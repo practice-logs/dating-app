@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>NexusChat</title>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/chat.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<div class="ch-bd" id="chBd" onclick="closeSb()"></div>
+
+<div class="app" id="app">
+
+<!-- ══ HEADER ══ -->
+<header class="hdr">
+  <button class="btn btn-icon btn-ghost ham" id="hamBtn" onclick="openSb()" style="width:34px;height:34px;"><i class="fas fa-bars" style="font-size:.9rem;"></i></button>
+  <a href="index.html" class="hdr-logo">
+    <div class="hdr-logo-ico"><i class="fas fa-bolt"></i></div>
+    <span class="hdr-logo-txt">NexusChat</span>
+  </a>
+  <div class="hdr-room">
+    <div class="hdr-room-name" id="hRN"><i class="fas fa-home" style="color:var(--textD);font-size:.75rem;"></i>&nbsp;Select a room</div>
+    <div class="hdr-room-meta" id="hRM"></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-search"><i class="fas fa-search ico"></i><input id="hSrch" type="text" placeholder="Search rooms..." oninput="filterRooms(this.value)"/></div>
+    <button class="btn btn-sm btn-secondary" onclick="openM('crModal')" style="white-space:nowrap;"><i class="fas fa-plus"></i><span class="hdr-btn-txt"> Room</span></button>
+    <button class="hdr-notif-btn" id="notifHdrBtn" onclick="goView('notifications')" title="Notifications">
+      <i class="fas fa-bell"></i><span class="nbdot" id="notifHdrDot" style="display:none;"></span>
+    </button>
+    <button class="theme-btn" id="thBtn" onclick="openM('joinModal')"><i class="fas fa-link"></i></button>
+    <div class="hdr-ava" id="hAva" onclick="goView('settings')" title="Settings"><img id="hAvaImg" src="" alt=""/></div>
+  </div>
+</header>
+
+<!-- ══ NAV RAIL ══ -->
+<nav class="nav">
+  <button class="nb on" id="nb-global" onclick="goRoom('global','global')"><i class="fas fa-globe"></i><span class="tip">Global Chat</span><span class="nbadge" id="nbd-global" style="display:none;"></span></button>
+  <button class="nb" id="nb-random" onclick="goNav('random')"><i class="fas fa-random"></i><span class="tip">Random Match</span></button>
+  <button class="nb" id="nb-discover" onclick="goView('discover')"><i class="fas fa-compass"></i><span class="tip">Discover</span></button>
+  <button class="nb" id="nb-usersearch" onclick="goView('usersearch')"><i class="fas fa-user-friends"></i><span class="tip">Find Users</span></button>
+  <div class="nav-sep"></div>
+  <button class="nb" id="nb-myrooms" onclick="goView('welcome')"><i class="fas fa-home"></i><span class="tip">My Rooms</span></button>
+  <button class="nb" onclick="openM('crModal')"><i class="fas fa-plus-circle"></i><span class="tip">Create Room</span></button>
+  <button class="nb" onclick="openM('joinModal')"><i class="fas fa-link"></i><span class="tip">Join Room</span></button>
+  <div class="nav-sep"></div>
+  <div class="nav-sp"></div>
+  <button class="nb" id="nb-notifications" onclick="goView('notifications')"><i class="fas fa-bell"></i><span class="tip">Notifications</span><span class="nbadge" id="nbd-notif" style="display:none;"></span></button>
+  <button class="nb" id="nb-settings" onclick="goView('settings')"><i class="fas fa-cog"></i><span class="tip">Settings</span></button>
+  <button class="nb" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i><span class="tip">Logout</span></button>
+</nav>
+
+<!-- ══ CHANNEL SIDEBAR ══ -->
+<aside class="ch-sb" id="chSb">
+  <div class="ch-head">
+    <div class="ch-head-row">
+      <span class="ch-head-title">Channels</span>
+      <button class="btn btn-icon-sm btn-ghost" onclick="openM('crModal')" title="Create room"><i class="fas fa-plus" style="font-size:.7rem;"></i></button>
+    </div>
+    <div class="ch-sw"><i class="fas fa-search ch-si"></i><input class="ch-s" id="chSrch" type="text" placeholder="Search channels..." oninput="filterRooms(this.value)"/></div>
+  </div>
+  <div class="ch-body" id="chBody">
+    <div class="sec-lbl"><i class="fas fa-globe" style="color:var(--accent3);font-size:.72rem;"></i> Public</div>
+    <div class="ri on" id="ri-global" onclick="goRoom('global','global')">
+      <div class="ricon" style="background:linear-gradient(135deg,rgba(62,237,207,.16),rgba(124,111,255,.16));">🌐</div>
+      <span class="rname">Global Chat</span><span class="rchip cg">Live</span>
+    </div>
+    <div class="sec-lbl" style="margin-top:.32rem;"><i class="fas fa-home" style="color:var(--accent);font-size:.72rem;"></i> My Rooms<button class="plus" onclick="openM('crModal')"><i class="fas fa-plus"></i></button></div>
+    <div id="myRL"><div style="padding:.34rem .58rem;font-size:.74rem;color:var(--textD);"><i class="fas fa-circle-notch fa-spin" style="margin-right:.32rem;font-size:.7rem;"></i>Loading...</div></div>
+    <div class="sec-lbl" style="margin-top:.32rem;"><i class="fas fa-users" style="color:var(--accent2);font-size:.72rem;"></i> Joined</div>
+    <div id="joinedRL"></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="chat-main" id="cMain">
+
+  <!-- WELCOME -->
+  <div class="welcome" id="vWelcome">
+    <div class="w-ico">💬</div>
+    <h1 class="w-title">Welcome to NexusChat</h1>
+    <p class="w-sub">Jump into the Global Chat, find a stranger, or create your own private room.</p>
+    <div class="wrow">
+      <div class="wcard" onclick="goRoom('global','global')"><span class="wcard-i">🌐</span><span class="wcard-l">Global Chat</span></div>
+      <div class="wcard" onclick="goNav('random')"><span class="wcard-i">🎲</span><span class="wcard-l">Random Match</span></div>
+      <div class="wcard" onclick="openM('crModal')"><span class="wcard-i">➕</span><span class="wcard-l">Create Room</span></div>
+      <div class="wcard" onclick="goView('discover')"><span class="wcard-i">🧭</span><span class="wcard-l">Discover</span></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="vChat" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <!-- Pinned -->
+    <div class="pinned-bar" id="pinnedBar" onclick="scrollToPin()">
+      <i class="fas fa-thumbtack" style="color:var(--accent);font-size:.78rem;"></i>
+      <span class="ptxt"><strong>Pinned: </strong><span id="pinTxt"></span></span>
+      <button style="background:none;border:none;color:var(--textD);cursor:pointer;font-size:.72rem;padding:.1rem .4rem;border-radius:4px;border:1px solid var(--border2);margin-right:.2rem;" onclick="event.stopPropagation();unpinMsg()" title="Unpin"><i class="fas fa-thumbtack"></i> Unpin</button>
+      <button style="background:none;border:none;color:var(--textD);cursor:pointer;font-size:.76rem;" onclick="event.stopPropagation();closePinned()"><i class="fas fa-times"></i></button>
+    </div>
+    <!-- Msg search -->
+    <div class="msbar" id="msgSB">
+      <i class="fas fa-search" style="color:var(--textD);font-size:.8rem;"></i>
+      <input type="text" placeholder="Search in this conversation..." oninput="searchMsgs(this.value)" id="msSrchInp"/>
+      <span style="font-size:.74rem;color:var(--textM);white-space:nowrap;" id="msSrchCnt"></span>
+      <button class="btn btn-ghost btn-xs" onclick="toggleMsgSearch()"><i class="fas fa-times"></i></button>
+    </div>
+    <!-- Messages -->
+    <div class="msgs" id="msgsWrap"></div>
+    <div class="tbar" id="typingBar"></div>
+    <!-- Reply ctx -->
+    <div class="rctx" id="rctxEl">
+      <i class="fas fa-reply" style="color:var(--accent);font-size:.8rem;"></i>
+      <span class="rctxt">Replying to <span class="rcname" id="rctxName"></span>: <span id="rctxPrev"></span></span>
+      <button class="rcx" onclick="cancelReply()"><i class="fas fa-times"></i></button>
+    </div>
+    <!-- Input area -->
+    <div class="inparea">
+      <div class="toolbar">
+        <div class="epwrap" id="epWrap">
+          <button class="tbtn" onclick="toggleEmoji()" title="Emoji"><i class="fas fa-smile"></i></button>
+          <div class="epicker" id="epicker">
+            <div class="eptabs" id="epTabs"></div>
+            <div class="epgrid" id="epGrid"></div>
+          </div>
+        </div>
+        <button class="tbtn" onclick="document.getElementById('imgFile').click()" title="Image"><i class="fas fa-image"></i></button>
+        <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="sendImage(event)"/>
+        <button class="tbtn" onclick="toggleMsgSearch()" title="Search messages"><i class="fas fa-search"></i></button>
+        <span class="cct" id="cct">0/500</span>
+      </div>
+      <div class="inprow">
+        <textarea class="chata" id="chatTa" placeholder="Message..." maxlength="500" rows="1"
+          oninput="onInput()" onkeydown="onKey(event)"></textarea>
+        <button class="sndbtn" id="sndBtn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RANDOM MATCH ══ -->
+  <div id="vRandom" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;">
+
+    <!-- IDLE: Choose mode -->
+    <div class="mscreen" id="rIdle">
+      <div style="font-size:3rem;animation:float 3.5s ease-in-out infinite;">🎲</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;">Random Match</h2>
+      <p style="color:var(--textM);max-width:300px;line-height:1.7;text-align:center;">Pick your vibe — chat with a stranger via text or go face-to-face with live video.</p>
+      <div class="rmode-row">
+        <div class="rmode-card" onclick="startMatch('chat')">
+          <div class="rmode-ico" style="background:linear-gradient(135deg,var(--accent3),var(--accent));">💬</div>
+          <div class="rmode-label">Chat Match</div>
+          <div class="rmode-sub">Text only · anonymous</div>
+          <button class="btn btn-primary btn-sm" style="margin-top:.9rem;width:100%;">
+            <i class="fas fa-comments"></i> Start Chat
+          </button>
+        </div>
+        <div class="rmode-card" onclick="startMatch('video')">
+          <div class="rmode-ico" style="background:linear-gradient(135deg,var(--accent2),#FF8C00);">🎥</div>
+          <div class="rmode-label">Video Match</div>
+          <div class="rmode-sub">Face to face · P2P</div>
+          <button class="btn btn-accent2 btn-sm" style="margin-top:.9rem;width:100%;">
+            <i class="fas fa-video"></i> Start Video
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCHING -->
+    <div class="mscreen" id="rSearching" style="display:none;">
+      <div class="morb" id="rSearchOrb"><i class="fas fa-search"></i></div>
+      <div class="mtimer" id="mTimer">0:00</div>
+      <div class="mlbl" id="rSearchLbl">Searching for a stranger...</div>
+      <button class="btn btn-ghost btn-sm" onclick="cancelMatch()" style="margin-top:.4rem;"><i class="fas fa-times"></i> Cancel</button>
+    </div>
+
+    <!-- VIDEO CALL UI -->
+    <div id="rVideo" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;">
+      <!-- Video area -->
+      <div class="vid-area" id="vidArea">
+        <!-- Remote (full bg) -->
+        <video id="remoteVideo" class="vid-remote" autoplay playsinline></video>
+        <div class="vid-remote-overlay" id="vidRemoteOverlay">
+          <div class="vid-waiting"><i class="fas fa-video" style="font-size:2rem;margin-bottom:.6rem;"></i><br>Connecting video...</div>
+        </div>
+        <!-- Local (PiP top-right) -->
+        <video id="localVideo" class="vid-local" autoplay playsinline muted></video>
+        <!-- Floating reaction burst zone -->
+        <div id="reactBurst" class="react-burst"></div>
+        <!-- Stranger label top-left -->
+        <div class="vid-stranger-lbl">👻 Stranger</div>
+        <!-- Connection status top-right (after PiP) -->
+        <div class="vid-status" id="vidStatus"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:.3rem;display:inline-block;"></span>Connecting...</div>
+        <!-- Reaction bar above controls -->
+        <div class="vid-react-bar">
+          <span onclick="sendReact('👋')">👋</span>
+          <span onclick="sendReact('❤️')">❤️</span>
+          <span onclick="sendReact('😂')">😂</span>
+          <span onclick="sendReact('🔥')">🔥</span>
+          <span onclick="sendReact('👏')">👏</span>
+          <span onclick="sendReact('😮')">😮</span>
+        </div>
+        <!-- Controls bar bottom-center -->
+        <div class="vid-controls" id="vidControls">
+          <button class="vid-btn" id="btnMute" onclick="toggleMute()" title="Mute/Unmute"><i class="fas fa-microphone"></i></button>
+          <button class="vid-btn" id="btnCam" onclick="toggleCam()" title="Camera on/off"><i class="fas fa-video"></i></button>
+          <button class="vid-btn red" onclick="endVideoCall()" title="End call"><i class="fas fa-phone-slash"></i></button>
+          <button class="vid-btn" id="btnNextV" onclick="nextVideoStranger()" title="Next stranger"><i class="fas fa-forward"></i></button>
+          <button class="vid-btn" id="btnBlur" onclick="toggleBlur()" title="Blur background"><i class="fas fa-circle-notch"></i></button>
+        </div>
+      </div>
+
+      <!-- Text chat alongside video -->
+      <div class="vid-chat-strip">
+        <div class="vid-msgs" id="vidMsgs"></div>
+        <div class="vid-inp-row">
+          <input class="vid-inp" id="vidInp" type="text" placeholder="Say something..." maxlength="200" onkeydown="vidKey(event)"/>
+          <button class="vid-send" onclick="sendVidMsg()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DISCOVER -->
+  <div id="vDiscover" style="display:none;flex:1;overflow:hidden;">
+    <div class="disc-wrap"><div class="disc-body">
+      <div class="disc-hero">
+        <div><div class="disc-hero-t">🧭 Discover Rooms</div><div class="disc-hero-s">Find public rooms by category.</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openM('crModal')"><i class="fas fa-plus"></i> Create</button>
+      </div>
+      <div class="dfilt" id="dFilt">
+        <div class="dfc on" onclick="dFilter('all',this)">All</div>
+        <div class="dfc" onclick="dFilter('Technology',this)"><i class="fas fa-code"></i> Tech</div>
+        <div class="dfc" onclick="dFilter('Gaming',this)"><i class="fas fa-gamepad"></i> Gaming</div>
+        <div class="dfc" onclick="dFilter('Music',this)"><i class="fas fa-music"></i> Music</div>
+        <div class="dfc" onclick="dFilter('Art',this)"><i class="fas fa-paint-brush"></i> Art</div>
+        <div class="dfc" onclick="dFilter('Study',this)"><i class="fas fa-book"></i> Study</div>
+        <div class="dfc" onclick="dFilter('Anime',this)"><i class="fas fa-star"></i> Anime</div>
+        <div class="dfc" onclick="dFilter('Random',this)"><i class="fas fa-random"></i> Random</div>
+      </div>
+      <div class="dgrid" id="dGrid"><div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--textD);"><i class="fas fa-circle-notch fa-spin" style="font-size:1.3rem;"></i></div></div>
+    </div></div>
+  </div>
+
+  <!-- USER SEARCH -->
+  <div id="vUserSearch" style="display:none;flex:1;overflow:hidden;">
+    <div style="padding:1.3rem;max-width:520px;margin:0 auto;height:100%;overflow-y:auto;">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.46rem;"><i class="fas fa-user-friends" style="color:var(--accent);"></i> Find Users</h2>
+      <div class="inp-wrap" style="margin-bottom:.9rem;">
+        <i class="fas fa-search ico"></i>
+        <input class="inp" type="text" id="uSrchInp" placeholder="Search by username..." oninput="searchUsers(this.value)" autocomplete="off"/>
+      </div>
+      <div id="uSrchRes"><div style="text-align:center;color:var(--textD);padding:2rem;font-size:.83rem;">Type a username to search</div></div>
+    </div>
+  </div>
+
+  <!-- USER PROFILE VIEW (full page) -->
+  <div id="vProfile" style="display:none;flex:1;overflow:hidden;">
+    <div class="profile-view" id="pvScroll">
+      <div class="pv-inner">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()" style="margin-bottom:.8rem;"><i class="fas fa-arrow-left"></i> Back</button>
+        <div style="background:var(--panel);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;">
+          <div class="pv-banner" id="pvBanner">
+            <div class="pv-ava" id="pvAva"><img id="pvAvaImg" src="" alt=""/></div>
+            <div class="pv-actions" id="pvActions"></div>
+          </div>
+          <div style="padding:3rem 1.5rem 1.5rem;">
+            <div class="pv-name" id="pvName">—</div>
+            <div class="pv-username" id="pvUN">@—</div>
+            <div class="pv-status" id="pvStatus"><span class="sdot son"></span> Online</div>
+            <div class="pv-bio" id="pvBio" style="display:none;"></div>
+            <div class="pv-stats" id="pvStats"></div>
+            <div class="pv-section" id="pvFriendsSection" style="display:none;">
+              <div class="pv-section-title"><i class="fas fa-user-friends"></i> Friends</div>
+              <div id="pvFriendsList"></div>
+            </div>
+            <div class="pv-section" id="pvInfoSection">
+              <div class="pv-section-title"><i class="fas fa-info-circle"></i> Info</div>
+              <div id="pvInfoContent" style="font-size:.83rem;color:var(--textM);line-height:1.7;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS ══ (FIXED: clear all + per-item dismiss) -->
+  <div id="vNotifs" style="display:none;flex:1;overflow:hidden;">
+    <div class="npanel">
+      <div class="nphead">
+        <span class="nptitle"><i class="fas fa-bell" style="color:var(--accent);"></i> Notifications</span>
+        <div style="display:flex;gap:.38rem;align-items:center;">
+          <button class="btn btn-ghost btn-xs" onclick="markAllRead()"><i class="fas fa-check-double"></i> Mark all read</button>
+          <button class="btn btn-ghost btn-xs" onclick="clearAllNotifs()" style="color:var(--err);border-color:rgba(255,82,82,.3);"><i class="fas fa-trash-alt"></i> Clear all</button>
+        </div>
+      </div>
+      <div class="nplist" id="npList"><div class="np-empty"><i class="fas fa-bell-slash"></i><span>No notifications yet</span></div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="vSettings" style="display:none;flex:1;overflow:hidden;">
+    <div class="swrap"><div class="sbody">
+      <div class="ssec">
+        <div class="ssec-t"><i class="fas fa-user-circle"></i> Profile</div>
+        <div class="pedit">
+          <div class="aedit" onclick="document.getElementById('sAvaFile').click()">
+            <div class="aedit-img"><img id="sAvaImg" src="" alt=""/></div>
+            <div class="aedit-ov"><i class="fas fa-camera"></i></div>
+          </div>
+          <input type="file" id="sAvaFile" accept="image/*" style="display:none" onchange="changeAva(event)"/>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:1rem;" id="sUN">—</div>
+            <div style="font-size:.79rem;color:var(--textM);" id="sEmail">—</div>
+            <div style="font-size:.7rem;color:var(--textD);margin-top:.13rem;" id="sJoined">—</div>
+          </div>
+        </div>
+        <div class="inp-group"><label><i class="fas fa-at"></i> Update Username</label><input class="inp" type="text" id="sNewUN" placeholder="New username..." maxlength="20" oninput="checkUN()"/><div class="fnote" id="sUNNote"></div></div>
+        <div class="inp-group"><label><i class="fas fa-align-left"></i> Bio</label><textarea class="inp" id="sBio" rows="2" maxlength="120" placeholder="Tell people about yourself..."></textarea></div>
+        <div class="inp-group"><label><i class="fas fa-comment-dots"></i> Status Message</label><input class="inp" type="text" id="sStatus" maxlength="60" placeholder="What's on your mind?"/></div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()"><i class="fas fa-save"></i> Save Profile</button>
+          <button class="btn btn-secondary btn-sm" onclick="updateUN()"><i class="fas fa-at"></i> Update Username</button>
+        </div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-t"><i class="fas fa-shield-alt"></i> Privacy</div>
+        <div class="srow"><div class="srow-l"><div class="lbl">Appear in User Search</div><div class="sub">Others can find you</div></div><button class="toggle on" id="tSrch" onclick="togglePref(this,'searchable')"></button></div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-t"><i class="fas fa-bell"></i> Notifications</div>
+        <div class="srow"><div class="srow-l"><div class="lbl">Sound on new message</div></div><button class="toggle on" id="tSnd" onclick="toggleLocal(this,'sound')"></button></div>
+        <div class="srow"><div class="srow-l"><div class="lbl">Desktop notifications</div></div><button class="toggle" id="tDesk" onclick="reqDesktop(this)"></button></div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-t"><i class="fas fa-palette"></i> Appearance</div>
+        <div class="srow"><div class="srow-l"><div class="lbl">Dark Mode</div></div><button class="toggle on" id="tDark" onclick="toggleThemeBtn(this)"></button></div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-t" style="color:var(--err);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div>
+        <button class="btn btn-danger btn-sm" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+      </div>
+    </div></div>
+  </div>
+
+</main>
+
+<!-- ══ RIGHT SIDEBAR ══ -->
+<aside class="rsb">
+  <div class="rsb-head">
+    <div class="rtabs">
+      <button class="rtab on" onclick="setRTab(this,'members')">Members</button>
+      <button class="rtab" onclick="setRTab(this,'info')">Room Info</button>
+    </div>
+  </div>
+  <div class="rsb-body" id="rsbBody">
+    <div style="padding:.5rem;text-align:center;color:var(--textD);font-size:.79rem;margin-top:.5rem;">
+      <i class="fas fa-comments" style="font-size:1.3rem;opacity:.25;display:block;margin-bottom:.38rem;"></i>Select a room
+    </div>
+  </div>
+</aside>
+
+</div><!-- /app -->
+
+<!-- Mobile bottom nav -->
+<div class="bot-nav" id="botNav">
+  <button class="bni" id="bn-notifications" onclick="goView('welcome')"><i class="fas fa-home"></i>Home<span class="nbadge" id="bn-notif-dot" style="display:none;"></span></button>
+   <button class="bni" id="bn-myrooms"onclick="goView('usersearch')"><i class="fa-brands fa-searchengin"></i>Search</button>
+  <button class="bni on" id="bn-global" onclick="goRoom('global','global')"><i class="fas fa-globe"></i>Global</button>
+  <button class="bni" id="bn-random" onclick="goNav('random')"><i class="fas fa-random"></i>Match</button>
+  <button class="bni" id="bn-settings" onclick="goView('settings')"><i class="fa-solid fa-user"></i>Me</button>
+</div>
+
+<!-- ══ MODALS ══ -->
+<!-- Create Room -->
+<div class="modal-ov" id="crModal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('crModal')"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-plus-circle" style="color:var(--accent);"></i> Create a Room</div>
+    <div style="display:flex;align-items:center;gap:.72rem;margin-bottom:1rem;">
+      <div id="crIcoPrev" style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.35rem;cursor:pointer;flex-shrink:0;" onclick="openM('icoModal')">🏠</div>
+      <div style="flex:1;"><div style="font-size:.74rem;color:var(--textM);margin-bottom:.28rem;">Room icon (click to change)</div><input type="file" id="crIcoFile" accept="image/*" style="display:none" onchange="previewRoomIco(event)"/><button class="btn btn-ghost btn-xs" onclick="document.getElementById('crIcoFile').click()"><i class="fas fa-upload"></i> Upload</button></div>
+    </div>
+    <div class="inp-group"><label><i class="fas fa-tag"></i> Room Name *</label><input class="inp" type="text" id="crName" placeholder="My awesome room" maxlength="40"/></div>
+    <div class="inp-group"><label><i class="fas fa-align-left"></i> Description</label><input class="inp" type="text" id="crDesc" placeholder="What's this room about?" maxlength="100"/></div>
+    <div class="inp-group"><label><i class="fas fa-layer-group"></i> Category</label>
+      <select class="inp" id="crCat"><option value="">None (private)</option><option>Technology</option><option>Gaming</option><option>Music</option><option>Art</option><option>Study</option><option>Anime</option><option>Sports</option><option>Movies</option><option>Random</option></select>
+    </div>
+    <div class="inp-group"><label><i class="fas fa-hashtag"></i> Tags (comma-separated)</label><input class="inp" type="text" id="crTags" placeholder="e.g. coding, help" maxlength="80"/></div>
+    <div class="inp-group"><label><i class="fas fa-lock"></i> Room Type</label>
+      <select class="inp" id="crType"><option value="personal">🏠 Personal — join by code/link</option><option value="ghost">👻 Ghost — anonymous usernames</option></select>
+    </div>
+    <div style="background:rgba(124,111,255,.07);border:1px solid rgba(124,111,255,.2);border-radius:var(--rSm);padding:.62rem .82rem;font-size:.8rem;color:var(--textM);margin-bottom:1rem;display:flex;gap:.42rem;align-items:flex-start;">
+      <i class="fas fa-info-circle" style="color:var(--accent);flex-shrink:0;margin-top:.05rem;"></i>
+      A unique 6-digit join code is auto-generated. Share it with friends to let them join.
+    </div>
+    <button class="btn btn-primary w-full" onclick="createRoom()"><i class="fas fa-rocket"></i> Create Room</button>
+  </div>
+</div>
+
+<!-- Icon picker -->
+<div class="modal-ov" id="icoModal">
+  <div class="modal modal-sm">
+    <button class="modal-x" onclick="closeM('icoModal')"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-smile" style="color:var(--accent);"></i> Pick Icon</div>
+    <div id="icoGrid" style="display:flex;flex-wrap:wrap;gap:.35rem;"></div>
+  </div>
+</div>
+
+<!-- Join Room -->
+<div class="modal-ov" id="joinModal">
+  <div class="modal modal-sm">
+    <button class="modal-x" onclick="closeM('joinModal')"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-link" style="color:var(--accent);"></i> Join a Room</div>
+    <p style="color:var(--textM);font-size:.85rem;margin-bottom:1rem;">Enter a Room ID or the 6-digit join code shared by the room owner.</p>
+    <div class="inp-group"><label><i class="fas fa-key"></i> Room ID or 6-digit Code</label><input class="inp" type="text" id="joinInp" placeholder="Paste ID or enter code..." autocomplete="off"/></div>
+    <button class="btn btn-primary w-full" onclick="joinById()"><i class="fas fa-sign-in-alt"></i> Join Room</button>
+  </div>
+</div>
+
+<!-- Room Created — Invite Info -->
+<div class="modal-ov" id="roomCreatedModal">
+  <div class="modal modal-sm">
+    <button class="modal-x" onclick="closeM('roomCreatedModal')"><i class="fas fa-times"></i></button>
+    <div class="modal-title" style="color:var(--ok);"><i class="fas fa-check-circle"></i> Room Created! 🎉</div>
+    <p style="color:var(--textM);font-size:.84rem;margin-bottom:1rem;">Share the invite link or 6-digit code below with friends so they can join.</p>
+    <div class="inp-group">
+      <label><i class="fas fa-key" style="color:var(--accent);"></i> 6-Digit Join Code</label>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <div id="rcJoinCode" style="flex:1;background:rgba(124,111,255,.1);border:2px solid var(--accent);border-radius:var(--rSm);padding:.55rem .9rem;font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:.22em;color:var(--accent);text-align:center;"></div>
+        <button class="btn btn-secondary btn-sm" onclick="copyRcCode()" title="Copy code"><i class="fas fa-copy"></i></button>
+      </div>
+    </div>
+    <div class="inp-group">
+      <label><i class="fas fa-link"></i> Invite Link</label>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <input class="inp" type="text" id="rcInviteLink" readonly style="font-size:.75rem;color:var(--textM);"/>
+        <button class="btn btn-secondary btn-sm" onclick="copyRcLink()" title="Copy link"><i class="fas fa-copy"></i></button>
+      </div>
+    </div>
+    <button class="btn btn-primary w-full" onclick="closeM('roomCreatedModal')"><i class="fas fa-comments"></i> Start Chatting</button>
+  </div>
+</div>
+
+<!-- Profile popup (mini) -->
+<div class="ppop" id="ppop">
+  <div class="pp-banner"><div class="pp-ava"><img id="ppAva" src="" alt=""/></div></div>
+  <div class="pp-body">
+    <div class="pp-name" id="ppName">—</div>
+    <div class="pp-st" id="ppSt"><span class="sdot son"></span> Online</div>
+    <div class="pp-bio" id="ppBio"></div>
+    <div class="pp-acts">
+      <button class="btn btn-primary btn-xs w-full" onclick="openFullProfile()" id="ppViewBtn"><i class="fas fa-user"></i> View Profile</button>
+      <button class="btn btn-secondary btn-xs w-full" id="ppFriendBtn" onclick="toggleFriendFromPopup()"><i class="fas fa-user-plus"></i> Add Friend</button>
+      <button class="btn btn-secondary btn-xs w-full" onclick="inviteFromPopup()"><i class="fas fa-user-plus"></i> Invite to Room</button>
+      <button class="btn btn-ghost btn-xs w-full" style="margin-top:.15rem;" onclick="closePpop()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-box"></div>
+
+<script type="module">
+// =====================================================
+// NexusChat V5 — Complete App (Video Match + Fixed Notifs)
+// =====================================================
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getDatabase,ref,set,get,push,onValue,remove,onDisconnect,update,query,limitToLast}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const cfg={apiKey:"AIzaSyBeT226lzGP0ERDY7QZhKF8zfo0OwSGEZ4",authDomain:"fir-50409.firebaseapp.com",databaseURL:"https://fir-50409-default-rtdb.firebaseio.com",projectId:"fir-50409",storageBucket:"fir-50409.firebasestorage.app",messagingSenderId:"336958746825",appId:"1:336958746825:web:dc23031418217663b85d18"};
+const app=initializeApp(cfg),auth=getAuth(app),db=getDatabase(app);
+
+// ── state ──
+let me=null,myP=null;
+let activeRoom=null,activeType=null;
+let unsubs=[],typTO=null,isTyping=false;
+let mTmr=null,mCnt=0,randRoom=null;
+let replyTo=null,pinId=null,prevView=null;
+let prefs=JSON.parse(localStorage.getItem('nc_prefs')||'{"sound":true}');
+let crIcoB64=null,crIcoEmoji='🏠';
+let msgCache={};
+let ppopUid=null,ppopUN='';
+const ICOS=['🏠','🎮','🎵','🎨','📚','🌍','🔥','✨','💬','🚀','🎯','🏆','👾','🎤','💡','🌙','⚡','🦋','🎭','🌈','🐶','🍕','🎲','🛸','🧠'];
+const ALL_VIEWS=['vWelcome','vChat','vRandom','vDiscover','vUserSearch','vProfile','vNotifs','vSettings'];
+
+// ── WebRTC state ──
+let pc=null;           // RTCPeerConnection
+let localStream=null;  // local MediaStream
+let vidRoomId=null;    // current video room id
+let vidUnsubs=[];      // firebase listeners for signaling
+let isMuted=false;
+let isCamOff=false;
+let isBlurred=false;
+let matchMode='chat';  // 'chat' | 'video'
+
+const RTC_CONFIG={iceServers:[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:stun1.l.google.com:19302'},
+  {urls:'stun:stun2.l.google.com:19302'}
+]};
+
+// ── theme ──
+const th=localStorage.getItem('nc_theme')||'dark';
+document.documentElement.setAttribute('data-theme',th);
+// document.getElementById('thIco').className=th==='dark'?'fas fa-moon':'fas fa-sun';
+// if(th==='light')document.getElementById('tDark')?.classList.remove('on');
+
+window.toggleTheme=()=>{const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';applyTh(n);};
+window.toggleThemeBtn=el=>{el.classList.toggle('on');applyTh(el.classList.contains('on')?'dark':'light');};
+function applyTh(n){document.documentElement.setAttribute('data-theme',n);localStorage.setItem('nc_theme',n);document.getElementById('thIco').className=n==='dark'?'fas fa-moon':'fas fa-sun';const d=document.getElementById('tDark');if(d)d.className='toggle'+(n==='dark'?' on':'');}
+
+// ── auth ──
+onAuthStateChanged(auth,async u=>{
+  if(!u){location.href='login.html';return;}
+  me=u;
+  const s=await get(ref(db,`users/${me.uid}`));
+  if(!s.exists()){location.href='create-username.html';return;}
+  myP=s.val();
+  const defaultAva=`https://ui-avatars.com/api/?name=${encodeURIComponent(myP.username||'U')}&background=7C6FFF&color=fff&bold=true&size=80`;
+  const ava=myP.avatar||defaultAva;
+  document.getElementById('hAvaImg').src=ava;
+  document.getElementById('sAvaImg').src=ava;
+  document.getElementById('sUN').textContent=myP.username;
+  document.getElementById('sEmail').textContent=me.email;
+  document.getElementById('sJoined').textContent='Joined '+new Date(myP.createdAt||Date.now()).toLocaleDateString();
+  document.getElementById('sBio').value=myP.bio||'';
+  document.getElementById('sStatus').value=myP.statusMsg||'';
+  if(myP.searchable===false)document.getElementById('tSrch')?.classList.remove('on');
+  setupPresence();
+  loadRooms();
+  initEmoji();
+  initIcoGrid();
+  applyPrefs();
+  subscribeNotifs();
+  const urlRoom=new URLSearchParams(location.search).get('room');
+  if(urlRoom)setTimeout(()=>joinById(urlRoom),600);
+});
+
+function setupPresence(){
+  const pr=ref(db,`presence/${me.uid}`);
+  set(pr,{online:true,lastSeen:Date.now(),username:myP.username,uid:me.uid});
+  onDisconnect(pr).set({online:false,lastSeen:Date.now()});
+}
+
+// ── load rooms ──
+function loadRooms(){
+  const u=onValue(ref(db,'rooms'),snap=>{
+    const owned=[],joined=[];
+    if(snap.exists()){Object.entries(snap.val()).forEach(([id,r])=>{if(r.type==='random')return;if(r.owner===me.uid)owned.push({id,...r});else if(r.members?.[me.uid])joined.push({id,...r});});}
+    document.getElementById('myRL').innerHTML=owned.length?owned.map(roomHTML).join(''):'<div style="padding:.32rem .58rem;font-size:.73rem;color:var(--textD);">No rooms yet</div>';
+    document.getElementById('joinedRL').innerHTML=joined.map(roomHTML).join('');
+  });
+  unsubs.push(u);
+}
+function roomHTML(r){
+  const ico=r.iconB64?`<img src="${r.iconB64}" alt=""/>`:(r.iconEmoji||'🏠');
+  const tc=r.type==='ghost'?'cgh':'cp',tl=r.type==='ghost'?'Ghost':'Private';
+  const own=r.owner===me.uid;
+  return `<div class="ri" id="ri-${r.id}" onclick="goRoom('${r.id}','${r.type||'personal'}')">
+    <div class="ricon">${ico}</div><span class="rname">${esc(r.name)}</span><span class="rchip ${tc}">${tl}</span>
+    ${own?`<button style="width:20px;height:20px;border-radius:50%;border:none;background:none;cursor:pointer;color:var(--textD);font-size:.68rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:color .14s;" onmouseenter="this.style.color='var(--err)'" onmouseleave="this.style.color='var(--textD)'" onclick="event.stopPropagation();deleteRoom('${r.id}')" title="Delete"><i class="fas fa-trash-alt"></i></button>`:''}
+  </div>`;
+}
+
+// ── navigation ──
+function setNavActive(id){
+  ['nb-global','nb-random','nb-discover','nb-usersearch','nb-myrooms','nb-notifications','nb-settings'].forEach(k=>document.getElementById(k)?.classList.remove('on'));
+  ['bn-global','bn-random','bn-myrooms','bn-notifications','bn-settings'].forEach(k=>document.getElementById(k)?.classList.remove('on'));
+  if(id){document.getElementById('nb-'+id)?.classList.add('on');document.getElementById('bn-'+id)?.classList.add('on');}
+}
+function showView(id){ALL_VIEWS.forEach(v=>{const el=document.getElementById(v);if(el)el.style.display='none';});const el=document.getElementById(id);if(el)el.style.display='flex';}
+
+window.goNav=n=>{
+  cleanListeners();
+  setNavActive(n);
+  if(n==='random'){showView('vRandom');setHdr('Random Match','<i class="fas fa-random"></i> Omegle-style');resetRandomUI();}
+  else showView('vWelcome');
+};
+window.goView=v=>{
+  cleanListeners();
+  const map={discover:'vDiscover',usersearch:'vUserSearch',notifications:'vNotifs',settings:'vSettings',welcome:'vWelcome'};
+  const vid=map[v]||'vWelcome';
+  prevView=v;
+  setNavActive(v);
+  showView(vid);
+  if(v==='discover'){loadDiscover();setHdr('Discover Rooms','');}
+  else if(v==='usersearch'){setHdr('Find Users','');}
+  else if(v==='notifications'){setHdr('Notifications','');markAllRead();}
+  else if(v==='settings'){setHdr('Settings','');}
+  else if(v==='welcome'){setHdr('NexusChat','');}
+};
+window.goBack=()=>{prevView&&prevView!=='profile'?goView(prevView):showView('vWelcome');};
+
+function resetRandomUI(){
+  document.getElementById('rIdle').style.display='flex';
+  document.getElementById('rSearching').style.display='none';
+  document.getElementById('rVideo').style.display='none';
+  // Reset video state indicators
+  document.getElementById('vidStatus').innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:.3rem;display:inline-block;"></span>Connecting...';
+  document.getElementById('vidRemoteOverlay').style.display='flex';
+  document.getElementById('btnMute').innerHTML='<i class="fas fa-microphone"></i>';
+  document.getElementById('btnMute').classList.remove('off');
+  document.getElementById('btnCam').innerHTML='<i class="fas fa-video"></i>';
+  document.getElementById('btnCam').classList.remove('off');
+  document.getElementById('btnBlur').classList.remove('on');
+}
+
+// ── join room ──
+window.goRoom=async(roomId,type)=>{
+  cleanListeners();
+  closeSb(); // always close mobile sidebar when entering a room
+  activeRoom=roomId;activeType=type;
+  document.querySelectorAll('.ri').forEach(el=>el.classList.remove('on'));
+  document.getElementById('ri-'+roomId)?.classList.add('on');
+  setNavActive(roomId==='global'?'global':null);
+  document.getElementById('bn-global')?.classList.toggle('on',roomId==='global');
+  showView('vChat');
+  let name='Global Chat',meta='<i class="fas fa-globe"></i> Public community room';
+  if(roomId!=='global'){
+    const s=await get(ref(db,`rooms/${roomId}`));
+    if(!s.exists()){toast('Room not found!','err');return;}
+    const r=s.val();name=r.name;
+    meta=r.type==='ghost'?'<i class="fas fa-ghost"></i> Ghost — anonymous':'<i class="fas fa-lock"></i> Private Room';
+    if(r.owner!==me.uid)await update(ref(db,`rooms/${roomId}/members`),{[me.uid]:true});
+    renderRsbInfo(roomId,r);
+  }else renderRsbGlobal();
+  setHdr(name,meta);
+  loadPinned(roomId);
+  subMessages(roomId);
+  subTyping(roomId);
+  subPresence();
+  document.getElementById('chatTa').placeholder=type==='ghost'?'Chat anonymously...':'Message...';
+};
+
+window.joinById=async idOrCode=>{
+  const val=(idOrCode||document.getElementById('joinInp')?.value||'').trim();
+  if(!val){toast('Enter a room ID or join code','err');return;}
+  let roomId=val,snap=await get(ref(db,`rooms/${val}`));
+  if(!snap.exists()){
+    const cs=await get(ref(db,`joinCodes/${val.toUpperCase()}`));
+    if(!cs.exists()){toast('Room not found!','err');return;}
+    roomId=cs.val();snap=await get(ref(db,`rooms/${roomId}`));
+    if(!snap.exists()){toast('Room not found!','err');return;}
+  }
+  closeM('joinModal');
+  goRoom(roomId,snap.val().type||'personal');
+};
+
+// ── MESSAGES ──
+function subMessages(roomId){
+  const path=roomId==='global'?'messages/global':`messages/${roomId}`;
+  const wrap=document.getElementById('msgsWrap');
+  wrap.innerHTML='<div class="smsg"><i class="fas fa-circle-notch fa-spin"></i>&nbsp;Loading...</div>';
+  msgCache={};
+  const q=query(ref(db,path),limitToLast(120));
+  const rendered=new Set();
+  const u=onValue(q,snap=>{
+    if(!snap.exists()){wrap.innerHTML='<div class="smsg"><i class="fas fa-comments"></i>&nbsp;No messages yet — say hello! 👋</div>';return;}
+    const data=snap.val();const ids=Object.keys(data);
+    if(rendered.size===0){
+      wrap.innerHTML='';wrap._lastDate=null;
+      ids.forEach(id=>{const m={id,...data[id]};msgCache[id]=m;rendered.add(id);renderMsg(m,wrap);});
+      scrollBottom();return;
+    }
+    ids.forEach(id=>{
+      const m={id,...data[id]};
+      if(!rendered.has(id)){rendered.add(id);msgCache[id]=m;renderMsg(m,wrap);scrollBottom();if(m.uid!==me.uid&&m.uid!=='system')playChime();}
+      else{msgCache[id]=m;updateMsgEl(id,m);}
+    });
+  });
+  unsubs.push(u);
+}
+
+function updateMsgEl(id,m){
+  const bbl=document.getElementById('bbl-'+id);
+  if(bbl){
+    if(m.deleted){bbl.className='bbl del';bbl.innerHTML='<em>Message deleted</em>';}
+    else if(m.text){
+      bbl.className='bbl'+(bbl.classList.contains('hl')?' hl':'');
+      let html=m.text?esc(m.text).replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'):'';
+      if(m.imageUrl)html+=`<img class="mimg" src="${m.imageUrl}" alt="image" onclick="openImg('${m.imageUrl}')"/>`;
+      if(m.gifUrl)html+=`<img class="mgif" src="${m.gifUrl}" alt="GIF" loading="lazy" onclick="openImg('${m.gifUrl}')"/>`;
+      bbl.innerHTML=html;
+    }
+  }
+  const reacEl=document.getElementById('reacts-'+id);
+  if(m.reactions&&Object.keys(m.reactions).length>0){
+    const html=Object.entries(m.reactions).map(([em,us])=>{const cnt=Object.keys(us).length,mine=!!us[me.uid];return`<span class="rchp${mine?' mine':''}" onclick="toggleReact('${id}','${em}')">${em}<span class="rcnt">${cnt}</span></span>`;}).join('');
+    if(reacEl){reacEl.innerHTML=html;reacEl.style.display='flex';}
+    else{const bbl=document.getElementById('bbl-'+id);if(bbl){const rd=document.createElement('div');rd.id='reacts-'+id;rd.className='reacts';rd.innerHTML=html;bbl.parentNode.insertBefore(rd,bbl.nextSibling);}}
+  }else if(reacEl){reacEl.innerHTML='';reacEl.style.display='none';}
+}
+
+function renderMsg(m,c){
+  if(!m.text&&!m.imageUrl&&!m.gifUrl)return;
+  if(m.uid==='system'){const d=document.createElement('div');d.className='smsg';d.id='msg-'+m.id;d.innerHTML=`<i class="fas fa-info-circle"></i>&nbsp;${esc(m.text)}`;c.appendChild(d);return;}
+  if(m.timestamp){
+    const ds=new Date(m.timestamp).toDateString();
+    if(c._lastDate!==ds){c._lastDate=ds;const sep=document.createElement('div');sep.className='dsep';const t=new Date().toDateString(),y=new Date(Date.now()-86400000).toDateString();sep.textContent=ds===t?'Today':ds===y?'Yesterday':new Date(m.timestamp).toLocaleDateString([],{month:'long',day:'numeric'});c.appendChild(sep);}
+  }
+  const own=m.uid===me.uid,ghost=activeType==='ghost';
+  const name=ghost&&!own?'👻 Ghost':esc(m.username||'?');
+  const ava=ghost&&!own?`https://ui-avatars.com/api/?name=G&background=FF5FA0&color=fff&bold=true&size=80`:(m.avatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.username||'?')}&background=7C6FFF&color=fff&bold=true&size=80`);
+  const time=m.timestamp?new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+  const reacts=m.reactions?Object.entries(m.reactions).map(([em,us])=>{const cnt=Object.keys(us).length,mine=!!us[me.uid];return`<span class="rchp${mine?' mine':''}" onclick="toggleReact('${m.id}','${em}')">${em}<span class="rcnt">${cnt}</span></span>`;}).join(''):'' ;
+  const replyH=m.replyTo?`<div class="rprev" onclick="scrollToMsg('${m.replyTo.id}')"><div class="rprev-name"><i class="fas fa-reply"></i> ${esc(m.replyTo.username||'?')}</div><span>${esc((m.replyTo.text||'').slice(0,55)+(m.replyTo.text?.length>55?'...':''))}</span></div>`:'';
+  let bubContent=m.deleted?'<em>Message deleted</em>':(m.text?esc(m.text).replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'):'');
+  if(!m.deleted&&m.imageUrl)bubContent+=`<img class="mimg" src="${m.imageUrl}" alt="image" onclick="openImg('${m.imageUrl}')"/>`;
+  if(!m.deleted&&m.gifUrl)bubContent+=`<img class="mgif" src="${m.gifUrl}" alt="GIF" loading="lazy" onclick="openImg('${m.gifUrl}')"/>`;
+  const receipt=own?`<div class="receipt${m.seenBy&&Object.keys(m.seenBy).length>1?' seen':''}"><i class="fas fa-check-double"></i></div>`:'';
+  const actHTML=`<div class="macts">
+    <button class="mac" title="React" onclick="showReactBar(event,'${m.id}')"><i class="fas fa-smile"></i></button>
+    <button class="mac" title="Reply" onclick="setReply('${m.id}','${esc(m.username||'')}','${esc((m.text||'').slice(0,55))}')"><i class="fas fa-reply"></i></button>
+    ${own&&!m.deleted?`<button class="mac" title="Edit" onclick="editMsg('${m.id}','${esc(m.text||'')}')"><i class="fas fa-pen"></i></button>`:''}
+    ${own||canMod()?`<button class="mac red" title="Delete" onclick="deleteMsg('${m.id}')"><i class="fas fa-trash-alt"></i></button>`:''}
+    <button class="mac" id="pinbtn-${m.id}" title="Pin/Unpin" onclick="togglePin('${m.id}','${esc((m.text||m.gifUrl||'Image').slice(0,55))}')"><i class="fas fa-thumbtack"></i></button>
+    <button class="mac" title="Report" onclick="reportMsg('${m.id}')"><i class="fas fa-flag"></i></button>
+  </div>`;
+  const div=document.createElement('div');div.className='mg'+(own?' own':'');div.id='msg-'+m.id;
+  div.innerHTML=`
+    ${!own?`<div class="mava" onclick="showPpop(event,'${m.uid}','${esc(m.username||'')}','${ava}')"><img src="${ava}" alt="${name}" loading="lazy"/></div>`:''}
+    <div class="mbody">
+      ${replyH}
+      <div class="mmeta">
+        ${!own?`<span class="mname" onclick="showPpop(event,'${m.uid}','${esc(m.username||'')}','${ava}')">${name}</span>`:''}
+        <span class="mtime">${time}</span>
+        ${m.edited&&!m.deleted?'<span class="medit">(edited)</span>':''}
+      </div>
+      <div class="bbl${m.deleted?' del':''}" id="bbl-${m.id}">${bubContent}</div>
+      ${reacts?`<div class="reacts" id="reacts-${m.id}">${reacts}</div>`:''}
+      ${receipt}
+    </div>
+    ${own?`<div class="mava" style="cursor:default;"><img src="${myP.avatar||''}" alt="You" loading="lazy"/></div>`:''}
+    ${actHTML}`;
+  c.appendChild(div);
+  // ★ FIX: Mobile long-press to show message actions
+  let lpTimer=null;
+  div.addEventListener('touchstart',e=>{
+    lpTimer=setTimeout(()=>{
+      document.querySelectorAll('.mg.touched').forEach(el=>el.classList.remove('touched'));
+      div.classList.add('touched');
+      e.preventDefault();
+    },480);
+  },{passive:false});
+  div.addEventListener('touchend',()=>clearTimeout(lpTimer));
+  div.addEventListener('touchmove',()=>clearTimeout(lpTimer));
+}
+function canMod(){return false;}
+function scrollBottom(){const w=document.getElementById('msgsWrap');requestAnimationFrame(()=>{w.scrollTop=w.scrollHeight;});}
+window.scrollToMsg=id=>{const el=document.getElementById('msg-'+id);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});const b=document.getElementById('bbl-'+id);b?.classList.add('hl');setTimeout(()=>b?.classList.remove('hl'),1800);}};
+
+// ── SEND MESSAGE ──
+window.sendMsg=async()=>{
+  const ta=document.getElementById('chatTa');const text=ta.value.trim();
+  if(!text||!activeRoom)return;
+  const now=Date.now();if(now-(window._ls||0)<700){toast('Slow down!','warn');return;}window._ls=now;
+  const path=activeRoom==='global'?'messages/global':`messages/${activeRoom}`;
+  const msg={uid:me.uid,username:myP.username,avatar:myP.avatar||'',text,timestamp:Date.now(),edited:false,deleted:false};
+  if(replyTo){msg.replyTo={id:replyTo.id,username:replyTo.username,text:replyTo.text};}
+  ta.value='';ta.style.height='auto';updateCct();cancelReply();clearTy();
+  await push(ref(db,path),msg).catch(()=>toast('Send failed','err'));
+};
+window.onInput=()=>{const ta=document.getElementById('chatTa');updateCct();ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,128)+'px';sendTy();};
+window.onKey=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
+function updateCct(){const v=document.getElementById('chatTa').value.length;document.getElementById('cct').textContent=`${v}/500`;}
+
+// ── typing ──
+function sendTy(){if(!activeRoom)return;if(!isTyping){isTyping=true;set(ref(db,`typing/${activeRoom}/${me.uid}`),{username:myP.username,ts:Date.now()});}clearTimeout(typTO);typTO=setTimeout(clearTy,2000);}
+function clearTy(){if(!activeRoom)return;isTyping=false;remove(ref(db,`typing/${activeRoom}/${me.uid}`));}
+function subTyping(rid){
+  const u=onValue(ref(db,`typing/${rid}`),snap=>{
+    const bar=document.getElementById('typingBar');
+    if(!snap.exists()){bar.innerHTML='';return;}
+    const typers=Object.values(snap.val()).filter(t=>t.username!==myP.username&&Date.now()-t.ts<4000).map(t=>t.username);
+    if(!typers.length){bar.innerHTML='';return;}
+    const n=typers.length===1?typers[0]:typers.length===2?typers.join(' & '):`${typers[0]} +${typers.length-1}`;
+    bar.innerHTML=`<span class="td"></span><span class="td"></span><span class="td"></span>&nbsp;${esc(n)} ${typers.length===1?'is':'are'} typing...`;
+  });
+  unsubs.push(u);
+}
+
+// ── presence ──
+function subPresence(){
+  const u=onValue(ref(db,'presence'),snap=>{
+    const co=document.getElementById('rsbOnline'),ul=document.getElementById('rsbUsers');
+    if(!snap.exists()){if(co)co.textContent='0';return;}
+    const online=Object.entries(snap.val()).filter(([,u])=>u.online);
+    if(co)co.textContent=online.length;
+    if(ul)ul.innerHTML=online.map(([uid,u])=>`
+      <div class="urow" onclick="fetchPpop(event,'${uid}')">
+        <div class="urow-ava"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.username||'?')}&background=7C6FFF&color=fff&bold=true&size=60" loading="lazy"/><div class="sdot son" style="border:2px solid var(--bg3);"></div></div>
+        <div style="flex:1;min-width:0;"><div class="urow-n">${esc(u.username||'?')}${uid===me.uid?' (You)':''}</div><div class="urow-s">Online</div></div>
+      </div>`).join('');
+  });
+  unsubs.push(u);
+}
+
+// ── right sidebar ──
+function renderRsbInfo(roomId,r){
+  const own=r.owner===me.uid;const link=`${location.origin}${location.pathname}?room=${roomId}`;const code=r.joinCode||'';
+  document.getElementById('rsbBody').innerHTML=`
+    <div class="rcard"><div class="rcard-name">${r.type==='ghost'?'👻 ':'🏠 '}${esc(r.name)}</div><div class="rcard-meta">${r.type==='ghost'?'Ghost Room':'Private Room'} · ${new Date(r.createdAt).toLocaleDateString()}</div>
+    ${r.desc?`<div style="font-size:.75rem;color:var(--textM);margin-bottom:.48rem;">${esc(r.desc)}</div>`:''}
+    <div class="inv-row"><div class="inv-code">${roomId}</div><button class="btn btn-xs btn-secondary" onclick="copyL('${link}','${roomId}')"><i class="fas fa-copy"></i></button></div>
+    ${code?`<div style="margin-top:.35rem;"><div style="font-size:.68rem;color:var(--textD);margin-bottom:.2rem;"><i class="fas fa-key"></i> 6-Digit Code</div><div class="inv-row"><div class="inv-code join-code-big">${code}</div><button class="btn btn-xs btn-secondary" onclick="navigator.clipboard.writeText('${code}').then(()=>toast('Code copied!','ok'))"><i class="fas fa-copy"></i></button></div></div>`:''}</div>
+    ${own?`<div class="modp"><div class="modp-t"><i class="fas fa-shield-alt"></i> Mod Tools</div><div><button class="mbtn" onclick="pinLatest()"><i class="fas fa-thumbtack"></i> Pin Latest</button><button class="mbtn red" onclick="clearMsgs('${roomId}')"><i class="fas fa-broom"></i> Clear Messages</button></div></div>`:''}
+    <div class="sec-lbl" style="margin-top:.28rem;"><i class="fas fa-circle" style="color:var(--ok);font-size:.5rem;"></i> Online — <span id="rsbOnline">0</span></div>
+    <div id="rsbUsers"></div>`;
+}
+function renderRsbGlobal(){
+  document.getElementById('rsbBody').innerHTML=`<div class="rcard"><div class="rcard-name">🌐 Global Chat</div><div class="rcard-meta">Public community room</div></div><div class="sec-lbl" style="margin-top:.28rem;"><i class="fas fa-circle" style="color:var(--ok);font-size:.5rem;"></i> Online — <span id="rsbOnline">0</span></div><div id="rsbUsers"></div>`;
+}
+window.setRTab=(el,tab)=>{document.querySelectorAll('.rtab').forEach(b=>b.classList.remove('on'));el.classList.add('on');};
+
+// ── pinned ──
+function loadPinned(rid){
+  const pr=rid==='global'?ref(db,'pinned/global'):ref(db,`pinned/${rid}`);
+  const u=onValue(pr,snap=>{
+    const bar=document.getElementById('pinnedBar');
+    // Reset all pin buttons
+    document.querySelectorAll('[id^="pinbtn-"]').forEach(b=>b.classList.remove('pin-active'));
+    if(!snap.exists()){bar.classList.remove('show');pinId=null;return;}
+    const p=snap.val();pinId=p.msgId;
+    document.getElementById('pinTxt').textContent=p.text||'';
+    bar.classList.add('show');
+    // Highlight the pinned message button
+    const pb=document.getElementById('pinbtn-'+pinId);if(pb)pb.classList.add('pin-active');
+  });
+  unsubs.push(u);
+}
+window.scrollToPin=()=>{if(pinId)scrollToMsg(pinId);};
+window.closePinned=()=>document.getElementById('pinnedBar').classList.remove('show');
+window.pinMsg=async(msgId,text)=>{const p=activeRoom==='global'?'pinned/global':`pinned/${activeRoom}`;await set(ref(db,p),{msgId,text,by:me.uid,ts:Date.now()});toast('Message pinned!','ok');};
+window.unpinMsg=async()=>{const p=activeRoom==='global'?'pinned/global':`pinned/${activeRoom}`;await remove(ref(db,p));document.getElementById('pinnedBar').classList.remove('show');pinId=null;toast('Message unpinned','ok');};
+window.togglePin=async(msgId,text)=>{if(pinId===msgId){await unpinMsg();}else{await pinMsg(msgId,text);}};
+window.pinLatest=()=>{const msgs=Object.values(msgCache);if(!msgs.length)return;const l=msgs[msgs.length-1];pinMsg(l.id,(l.text||'Media').slice(0,55));};
+
+// ── message actions ──
+window.editMsg=async(msgId,old)=>{const n=prompt('Edit message:',old);if(!n||n===old)return;const p=msgPath(msgId);await update(ref(db,p),{text:n,edited:true});};
+window.deleteMsg=async msgId=>{if(!confirm('Delete this message?'))return;const p=msgPath(msgId);await update(ref(db,p),{deleted:true,text:'',imageUrl:null,gifUrl:null});};
+window.clearMsgs=async rid=>{if(!confirm('Clear ALL messages in this room?'))return;await remove(ref(db,`messages/${rid}`));toast('Cleared','ok');};
+window.reportMsg=async msgId=>{const r=prompt('Reason for reporting:');if(!r)return;await push(ref(db,'reports'),{messageId:msgId,reporter:me.uid,reason:r,roomId:activeRoom,ts:Date.now()});toast('Reported. Thank you.','ok');};
+function msgPath(id){return activeRoom==='global'?`messages/global/${id}`:`messages/${activeRoom}/${id}`;}
+
+// ── REACTIONS ──
+window.showReactBar=(e,msgId)=>{
+  e.stopPropagation();e.preventDefault();
+  const old=document.getElementById('qrbar');if(old)old.remove();
+  const ems=['👍','❤️','😂','😮','😢','🔥','🎉','💯','😍','🤯'];
+  const bar=document.createElement('div');bar.id='qrbar';
+  bar.style.cssText=`position:fixed;z-index:9998;background:var(--panel);border:1px solid var(--border2);border-radius:var(--rPill);padding:.26rem .36rem;display:flex;gap:.16rem;box-shadow:var(--sh);`;
+  const bx=Math.min(e.clientX-80,window.innerWidth-260);const by=Math.max(e.clientY-54,8);
+  bar.style.left=bx+'px';bar.style.top=by+'px';
+  ems.forEach(em=>{const b=document.createElement('button');b.className='epbtn';b.textContent=em;b.style.fontSize='1.2rem';b.onclick=async()=>{bar.remove();const path=`${msgPath(msgId)}/reactions/${em}/${me.uid}`;const s=await get(ref(db,path));if(s.exists())await remove(ref(db,path));else await set(ref(db,path),true);};bar.appendChild(b);});
+  document.body.appendChild(bar);
+  const close=()=>{bar.remove();document.removeEventListener('click',close);};setTimeout(()=>document.addEventListener('click',close),80);
+};
+window.toggleReact=async(msgId,emoji)=>{const path=`${msgPath(msgId)}/reactions/${emoji}/${me.uid}`;const s=await get(ref(db,path));if(s.exists())await remove(ref(db,path));else await set(ref(db,path),true);};
+
+// ── reply ──
+window.setReply=(id,un,txt)=>{replyTo={id,username:un,text:txt};document.getElementById('rctxName').textContent=un;document.getElementById('rctxPrev').textContent=txt;document.getElementById('rctxEl').classList.add('show');document.getElementById('chatTa').classList.add('ron');document.getElementById('chatTa').focus();};
+window.cancelReply=()=>{replyTo=null;document.getElementById('rctxEl').classList.remove('show');document.getElementById('chatTa').classList.remove('ron');};
+
+// ── images ──
+window.sendImage=async e=>{const f=e.target.files[0];if(!f||!activeRoom)return;if(f.size>2*1024*1024){toast('Max 2MB','err');return;}const r=new FileReader();r.onload=async ev=>{const p=activeRoom==='global'?'messages/global':`messages/${activeRoom}`;await push(ref(db,p),{uid:me.uid,username:myP.username,avatar:myP.avatar||'',text:'',imageUrl:ev.target.result,timestamp:Date.now(),edited:false,deleted:false});};r.readAsDataURL(f);e.target.value='';};
+window.openImg=src=>{
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .18s ease;';
+  // Close button
+  const closeBtn=document.createElement('button');
+  closeBtn.innerHTML='<i class="fas fa-times"></i>';
+  closeBtn.style.cssText='position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10001;transition:background .16s;';
+  closeBtn.onmouseenter=()=>closeBtn.style.background='rgba(255,255,255,.28)';
+  closeBtn.onmouseleave=()=>closeBtn.style.background='rgba(255,255,255,.15)';
+  closeBtn.onclick=()=>ov.remove();
+  // Image
+  const img=document.createElement('img');
+  img.src=src;
+  img.style.cssText='max-width:92vw;max-height:90vh;border-radius:var(--r);box-shadow:var(--sh);cursor:default;';
+  img.onclick=e=>e.stopPropagation();
+  ov.onclick=()=>ov.remove();
+  ov.appendChild(closeBtn);
+  ov.appendChild(img);
+  document.body.appendChild(ov);
+};
+
+// ── msg search ──
+window.toggleMsgSearch=()=>{const el=document.getElementById('msgSB');el.classList.toggle('open');if(el.classList.contains('open'))document.getElementById('msSrchInp').focus();else{document.getElementById('msSrchCnt').textContent='';document.querySelectorAll('.bbl.hl').forEach(b=>b.classList.remove('hl'));}};
+window.searchMsgs=q=>{document.querySelectorAll('.bbl.hl').forEach(b=>b.classList.remove('hl'));if(!q){document.getElementById('msSrchCnt').textContent='';return;}const m=Object.values(msgCache).filter(m=>m.text&&m.text.toLowerCase().includes(q.toLowerCase()));document.getElementById('msSrchCnt').textContent=`${m.length} found`;m.forEach(msg=>{const b=document.getElementById('bbl-'+msg.id);if(b)b.classList.add('hl');});if(m.length)scrollToMsg(m[0].id);};
+
+// ── GIF ──
+window.toggleGif=()=>{const el=document.getElementById('gfpicker');el.classList.toggle('open');document.getElementById('epicker').classList.remove('open');if(el.classList.contains('open'))document.getElementById('gfSrch').focus();};
+let gifTO=null;
+window.queueGif=q=>{clearTimeout(gifTO);const g=document.getElementById('gfGrid');if(!q){g.innerHTML='<div class="gfempty"><i class="fas fa-search" style="margin-right:.36rem;"></i>Type to search GIFs</div>';return;}g.innerHTML='<div class="gfempty"><span class="spin spin-accent" style="width:13px;height:13px;border-width:2px;"></span>&nbsp;Searching...</div>';gifTO=setTimeout(()=>fetchGifs(q),480);};
+async function fetchGifs(q){
+  const g=document.getElementById('gfGrid');
+  try{const r=await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=AIzaSyAyimkuYQYF_FXVALexPzkcsvZnUpdated&client_key=nexuschat&limit=12`);const d=await r.json();if(!d.results?.length){g.innerHTML='<div class="gfempty">No GIFs found</div>';return;}g.innerHTML=d.results.map(gf=>{const url=gf.media_formats?.tinygif?.url||'';return`<div class="gfi" onclick="sendGif('${url}')"><img src="${url}" alt="gif" loading="lazy"/></div>`;}).join('');}
+  catch{const ph=['https://media.giphy.com/media/3o7TKSjRrfIPjeiVyE/giphy.gif','https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif','https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif','https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'];g.innerHTML=ph.map(u=>`<div class="gfi" onclick="sendGif('${u}')"><img src="${u}" alt="gif" loading="lazy"/></div>`).join('');}
+}
+window.sendGif=async url=>{if(!activeRoom||!url)return;document.getElementById('gfpicker').classList.remove('open');const p=activeRoom==='global'?'messages/global':`messages/${activeRoom}`;await push(ref(db,p),{uid:me.uid,username:myP.username,avatar:myP.avatar||'',text:'',gifUrl:url,timestamp:Date.now(),edited:false,deleted:false});};
+
+// ── emoji ──
+const ECAT={'😀':'Smileys','👋':'People','🐶':'Animals','🍎':'Food','⚽':'Sports','✈️':'Travel','💡':'Objects','❤️':'Symbols'};
+const EMS={'Smileys':['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😏','😒','😔','😢','😭','😤','😱','🥺','😳','😴','🤩','🤔','🤫','🥳','🫡','😇','🤗'],'People':['👋','🤚','🖐️','✋','👌','✌️','🤞','👍','👎','✊','👊','🤛','🤜','👏','🙌','🙏','💪','🤝','💅'],'Animals':['🐶','🐱','🐭','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐺','🦄','🐬','🦈','🐊'],'Food':['🍎','🍊','🍋','🍇','🍓','🫐','🍒','🍔','🍟','🍕','🌮','🌯','🍜','🍣','🍩','🍪','🎂','🍰','🧁','☕','🍵','🧃','🍺','🍷'],'Sports':['⚽','🏀','🏈','⚾','🎾','🏐','🎱','🏓','🥊','🎯','⛳','🎮','🕹️','🎲'],'Travel':['✈️','🚀','🚗','🏎️','🚢','🚆','🏠','🏡','🏢','🗽','🏰','🌋','🏔️','🏖️'],'Objects':['💡','🔦','💰','💎','🔧','🔑','📱','💻','📷','📺','🎙️','🎚️'],'Symbols':['❤️','🧡','💛','💚','💙','💜','🖤','💔','❣️','💕','💯','✅','❌','⚠️','🔔','🎵','🎶']};
+let eCat='Smileys';
+function initEmoji(){
+  const tabs=document.getElementById('epTabs');
+  Object.entries(ECAT).forEach(([e,cat])=>{const b=document.createElement('button');b.className='eptab'+(cat===eCat?' on':'');b.textContent=e;b.title=cat;b.onclick=()=>{eCat=cat;document.querySelectorAll('.eptab').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderEmoji(EMS[cat]);};tabs.appendChild(b);});
+  renderEmoji(EMS[eCat]);
+}
+function renderEmoji(ems){const g=document.getElementById('epGrid');g.innerHTML='';ems.forEach(e=>{const b=document.createElement('button');b.className='epbtn';b.textContent=e;b.onclick=()=>{const ta=document.getElementById('chatTa');ta.value+=e;ta.focus();updateCct();closeEP();};g.appendChild(b);});}
+window.toggleEmoji=()=>{const ep=document.getElementById('epicker');ep.classList.toggle('open');};
+function closeEP(){document.getElementById('epicker').classList.remove('open');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#epWrap'))closeEP();
+  if(!e.target.closest('.mg'))document.querySelectorAll('.mg.touched').forEach(el=>el.classList.remove('touched'));
+});
+
+// ── icon grid ──
+function initIcoGrid(){
+  const g=document.getElementById('icoGrid');if(!g)return;
+  ICOS.forEach(ic=>{const b=document.createElement('button');b.style.cssText='width:40px;height:40px;border-radius:8px;border:1.5px solid var(--border2);background:var(--panel2);cursor:pointer;font-size:1.32rem;display:flex;align-items:center;justify-content:center;transition:all .14s;';b.textContent=ic;b.onmouseenter=()=>{b.style.borderColor='var(--accent)';b.style.background='var(--panel3)';};b.onmouseleave=()=>{b.style.borderColor='var(--border2)';b.style.background='var(--panel2)';};b.onclick=()=>{crIcoEmoji=ic;crIcoB64=null;const p=document.getElementById('crIcoPrev');p.innerHTML=ic;p.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';closeM('icoModal');};g.appendChild(b);});
+}
+window.previewRoomIco=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{crIcoB64=ev.target.result;const p=document.getElementById('crIcoPrev');p.innerHTML=`<img src="${crIcoB64}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"/>`;p.style.background='none';};r.readAsDataURL(f);};
+
+// ── create room ──
+window.createRoom=async()=>{
+  const name=document.getElementById('crName').value.trim();if(!name){toast('Enter a room name','err');return;}
+  const desc=document.getElementById('crDesc').value.trim();const cat=document.getElementById('crCat').value;const tags=document.getElementById('crTags').value.split(',').map(t=>t.trim()).filter(Boolean).slice(0,5);const type=document.getElementById('crType').value;
+  const joinCode=Math.floor(100000+Math.random()*900000).toString();const rRef=push(ref(db,'rooms'));const id=rRef.key;
+  await set(rRef,{name,desc,cat,tags,type,iconEmoji:crIcoEmoji,iconB64:crIcoB64||null,owner:me.uid,ownerName:myP.username,createdAt:Date.now(),members:{[me.uid]:true},isPublic:!!cat,joinCode});
+  await set(ref(db,`joinCodes/${joinCode}`),id);
+  closeM('crModal');['crName','crDesc','crTags'].forEach(fid=>document.getElementById(fid).value='');
+  crIcoB64=null;crIcoEmoji='🏠';const p=document.getElementById('crIcoPrev');if(p){p.innerHTML='🏠';p.style.background='linear-gradient(135deg,var(--accent),var(--accent2))';}
+  // ★ FIX: Show invite info modal so user can see code & link on mobile
+  const inviteLink=`${location.origin}${location.pathname}?room=${id}`;
+  document.getElementById('rcJoinCode').textContent=joinCode;
+  document.getElementById('rcInviteLink').value=inviteLink;
+  window._rcCode=joinCode;window._rcLink=inviteLink;
+  openM('roomCreatedModal');
+  goRoom(id,type);
+};
+window.copyRcCode=()=>{navigator.clipboard.writeText(window._rcCode||'').then(()=>toast('Join code copied!','ok'));};
+window.copyRcLink=()=>{navigator.clipboard.writeText(window._rcLink||'').then(()=>toast('Invite link copied!','ok'));};
+window.deleteRoom=async rid=>{
+  if(!confirm('Delete this room?'))return;const s=await get(ref(db,`rooms/${rid}`));if(!s.exists()||s.val().owner!==me.uid){toast('Permission denied','err');return;}
+  const code=s.val().joinCode;await remove(ref(db,`rooms/${rid}`));await remove(ref(db,`messages/${rid}`));await remove(ref(db,`pinned/${rid}`));if(code)await remove(ref(db,`joinCodes/${code}`));
+  toast('Room deleted','ok');if(activeRoom===rid){activeRoom=null;showView('vWelcome');}
+};
+window.copyL=(link,rid)=>{navigator.clipboard.writeText(link).then(()=>toast('Invite link copied!','ok')).catch(()=>navigator.clipboard.writeText(rid).then(()=>toast('Room ID copied!','ok')));};
+
+// ── discover ──
+let dCat='all';
+function loadDiscover(){
+  get(ref(db,'rooms')).then(snap=>{
+    const g=document.getElementById('dGrid');
+    if(!snap.exists()){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--textD);">No public rooms yet.</div>';return;}
+    const rooms=Object.entries(snap.val()).map(([id,r])=>({id,...r})).filter(r=>r.type!=='random'&&r.isPublic);
+    const fil=dCat==='all'?rooms:rooms.filter(r=>r.cat===dCat);
+    if(!fil.length){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--textD);">No rooms in this category.</div>';return;}
+    g.innerHTML=fil.map(r=>{const ico=r.iconB64?`<img src="${r.iconB64}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;"/>`:(r.iconEmoji||'🏠');const tags=(r.tags||[]).map(t=>`<span class="dtag">${esc(t)}</span>`).join('');return`<div class="dcard" onclick="goRoom('${r.id}','${r.type||'personal'}')"><div class="dcard-top"><div class="dico">${ico}</div><div><div class="dname">${esc(r.name)}</div><div class="dtype">${r.cat||'General'}</div></div></div>${r.desc?`<div class="ddesc">${esc(r.desc)}</div>`:''}<div class="dfoot"><div class="dtags">${tags}</div><span>${new Date(r.createdAt).toLocaleDateString()}</span></div></div>`;}).join('');
+  });
+}
+window.dFilter=(cat,el)=>{dCat=cat;document.querySelectorAll('.dfc').forEach(c=>c.classList.remove('on'));el.classList.add('on');loadDiscover();};
+
+// ── user search ──
+let usTO=null;
+window.searchUsers=q=>{
+  clearTimeout(usTO);const res=document.getElementById('uSrchRes');
+  if(!q){res.innerHTML='<div style="text-align:center;color:var(--textD);padding:2rem;font-size:.82rem;">Type a username to search</div>';return;}
+  res.innerHTML='<div style="text-align:center;color:var(--textD);padding:1rem;"><span class="spin spin-accent" style="width:13px;height:13px;border-width:2px;"></span></div>';
+  usTO=setTimeout(async()=>{
+    const snap=await get(ref(db,'usernames'));if(!snap.exists()){res.innerHTML='<div style="text-align:center;color:var(--textD);padding:1rem;font-size:.82rem;">No users found</div>';return;}
+    const matches=Object.entries(snap.val()).filter(([un])=>un.toLowerCase().includes(q.toLowerCase())).slice(0,15);
+    if(!matches.length){res.innerHTML='<div style="text-align:center;color:var(--textD);padding:1rem;font-size:.82rem;">No users found</div>';return;}
+    const profiles=await Promise.all(matches.map(async([,uid])=>{const s=await get(ref(db,`users/${uid}`));return s.exists()?{uid,...s.val()}:null;}));
+    const valid=profiles.filter(p=>p&&p.searchable!==false);
+    if(!valid.length){res.innerHTML='<div style="text-align:center;color:var(--textD);padding:1rem;font-size:.82rem;">No visible users found</div>';return;}
+    res.innerHTML=valid.map(u=>`
+      <div style="display:flex;align-items:center;gap:.62rem;padding:.6rem .68rem;background:var(--panel);border:1px solid var(--border2);border-radius:var(--rSm);margin-bottom:.38rem;cursor:pointer;transition:border-color .15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border2)'" onclick="openProfilePage('${u.uid}')">
+        <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;"><img src="${u.avatar||''}" alt="${esc(u.username)}" style="width:100%;height:100%;object-fit:cover;"/></div>
+        <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.85rem;">${esc(u.username)}</div><div style="font-size:.71rem;color:var(--textD);">${esc(u.statusMsg||'')}</div></div>
+        <div style="display:flex;gap:.3rem;">
+          <button class="btn btn-xs btn-primary" onclick="event.stopPropagation();openProfilePage('${u.uid}')"><i class="fas fa-user"></i></button>
+          <button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();sendInvite('${u.uid}','${esc(u.username)}')"><i class="fas fa-paper-plane"></i> Invite</button>
+        </div>
+      </div>`).join('');
+  },380);
+};
+
+// ── FULL PROFILE PAGE ──
+let profileUid=null;
+window.openProfilePage=async uid=>{
+  prevView='usersearch';profileUid=uid;showView('vProfile');setHdr('User Profile','');
+  document.getElementById('pvAvaImg').src='';document.getElementById('pvName').textContent='Loading...';document.getElementById('pvUN').textContent='';document.getElementById('pvBio').style.display='none';document.getElementById('pvStats').innerHTML='';document.getElementById('pvActions').innerHTML='';document.getElementById('pvInfoContent').innerHTML='';document.getElementById('pvFriendsSection').style.display='none';
+  const snap=await get(ref(db,`users/${uid}`));if(!snap.exists()){toast('User not found','err');return;}
+  const u={uid,...snap.val()};
+  document.getElementById('pvAvaImg').src=u.avatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=7C6FFF&color=fff&bold=true&size=80`;
+  document.getElementById('pvName').textContent=u.username;document.getElementById('pvUN').textContent='@'+u.username;
+  if(u.bio||u.statusMsg){const b=document.getElementById('pvBio');b.textContent=u.bio||u.statusMsg||'';b.style.display='block';}
+  const presSnap=await get(ref(db,`presence/${uid}`));const isOnline=presSnap.exists()&&presSnap.val().online;
+  document.getElementById('pvStatus').innerHTML=`<span class="sdot ${isOnline?'son':'soff'}"></span> ${isOnline?'Online':'Offline'}`;
+  document.getElementById('pvStats').innerHTML=`<div class="pv-stat"><div class="pv-stat-n">${new Date(u.createdAt||Date.now()).toLocaleDateString([],{month:'short',year:'numeric'})}</div><div class="pv-stat-l">Joined</div></div><div class="pv-stat" id="pvFriendCount"><div class="pv-stat-n">—</div><div class="pv-stat-l">Friends</div></div>`;
+  document.getElementById('pvInfoContent').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;"><div style="background:var(--panel2);border-radius:var(--rSm);padding:.5rem .7rem;"><div style="font-size:.67rem;color:var(--textD);margin-bottom:.12rem;text-transform:uppercase;letter-spacing:.06em;">Status</div><div style="font-size:.82rem;">${esc(u.statusMsg||'Hey there!')}</div></div><div style="background:var(--panel2);border-radius:var(--rSm);padding:.5rem .7rem;"><div style="font-size:.67rem;color:var(--textD);margin-bottom:.12rem;text-transform:uppercase;letter-spacing:.06em;">Member since</div><div style="font-size:.82rem;">${new Date(u.createdAt||Date.now()).toLocaleDateString()}</div></div></div>`;
+  if(uid!==me.uid){
+    const fSnap=await get(ref(db,`friends/${me.uid}/${uid}`));const fReqSnap=await get(ref(db,`friendRequests/${uid}/${me.uid}`));const isFriend=fSnap.exists();const isPending=fReqSnap.exists();
+    document.getElementById('pvActions').innerHTML=`<button class="btn btn-sm btn-secondary" id="pvFriendActBtn" onclick="toggleFriendProfile('${uid}')"><i class="fas fa-${isFriend?'user-minus':'user-plus'}"></i> ${isFriend?'Unfriend':isPending?'Pending...':'Add Friend'}</button><button class="btn btn-sm btn-primary" onclick="sendInvite('${uid}','${esc(u.username)}')"><i class="fas fa-paper-plane"></i> Invite to Room</button>`;
+  }
+  loadProfileFriends(uid);
+};
+async function loadProfileFriends(uid){
+  const snap=await get(ref(db,`friends/${uid}`));const count=snap.exists()?Object.keys(snap.val()).length:0;const countEl=document.getElementById('pvFriendCount');if(countEl)countEl.querySelector('.pv-stat-n').textContent=count;if(count===0)return;
+  const sec=document.getElementById('pvFriendsSection');sec.style.display='block';const list=document.getElementById('pvFriendsList');
+  const friendIds=Object.keys(snap.val()).slice(0,8);const fProfiles=await Promise.all(friendIds.map(async fid=>{const s=await get(ref(db,`users/${fid}`));return s.exists()?{uid:fid,...s.val()}:null;}));const valid=fProfiles.filter(Boolean);
+  list.innerHTML=valid.map(f=>`<div class="friend-row" onclick="openProfilePage('${f.uid}')"><div class="friend-ava"><img src="${f.avatar||''}" alt="${esc(f.username)}"/><div class="sdot soff" style="border:2px solid var(--panel);"></div></div><div style="flex:1;min-width:0;"><div class="friend-name">${esc(f.username)}</div><div class="friend-sub">${esc(f.statusMsg||'')}</div></div><i class="fas fa-chevron-right" style="color:var(--textD);font-size:.76rem;"></i></div>`).join('');
+}
+
+// ── FRIENDS SYSTEM ──
+window.toggleFriendProfile=async uid=>{
+  const btn=document.getElementById('pvFriendActBtn');const fSnap=await get(ref(db,`friends/${me.uid}/${uid}`));
+  if(fSnap.exists()){if(!confirm('Remove this friend?'))return;await remove(ref(db,`friends/${me.uid}/${uid}`));await remove(ref(db,`friends/${uid}/${me.uid}`));btn.innerHTML='<i class="fas fa-user-plus"></i> Add Friend';toast('Friend removed','ok');}
+  else{await set(ref(db,`friends/${me.uid}/${uid}`),{since:Date.now()});await set(ref(db,`friends/${uid}/${me.uid}`),{since:Date.now()});await push(ref(db,`notifications/${uid}`),{type:'friend_add',from:me.uid,fromName:myP.username,fromAva:myP.avatar||'',ts:Date.now(),read:false});btn.innerHTML='<i class="fas fa-user-minus"></i> Unfriend';toast('Friend added!','ok');}
+};
+window.toggleFriendFromPopup=async()=>{
+  if(!ppopUid)return;const fSnap=await get(ref(db,`friends/${me.uid}/${ppopUid}`));
+  if(fSnap.exists()){if(!confirm('Remove friend?'))return;await remove(ref(db,`friends/${me.uid}/${ppopUid}`));await remove(ref(db,`friends/${ppopUid}/${me.uid}`));document.getElementById('ppFriendBtn').innerHTML='<i class="fas fa-user-plus"></i> Add Friend';toast('Friend removed','ok');}
+  else{await set(ref(db,`friends/${me.uid}/${ppopUid}`),{since:Date.now()});await set(ref(db,`friends/${ppopUid}/${me.uid}`),{since:Date.now()});await push(ref(db,`notifications/${ppopUid}`),{type:'friend_add',from:me.uid,fromName:myP.username,fromAva:myP.avatar||'',ts:Date.now(),read:false});document.getElementById('ppFriendBtn').innerHTML='<i class="fas fa-user-minus"></i> Unfriend';toast('Friend added!','ok');}
+};
+window.openFullProfile=()=>{if(ppopUid){closePpop();openProfilePage(ppopUid);}};
+
+// ── profile popup ──
+window.showPpop=async(e,uid,un,ava)=>{
+  e.stopPropagation();ppopUid=uid;ppopUN=un;const pop=document.getElementById('ppop');
+  const fallbackAva=ava||`https://ui-avatars.com/api/?name=${encodeURIComponent(un||'?')}&background=7C6FFF&color=fff&bold=true&size=80`;
+  document.getElementById('ppAva').src=fallbackAva;
+  document.getElementById('ppName').textContent=un;document.getElementById('ppBio').textContent='';document.getElementById('ppSt').innerHTML='<span class="sdot son"></span> Online';
+  get(ref(db,`users/${uid}`)).then(async s=>{if(s.exists()){const u=s.val();document.getElementById('ppBio').textContent=u.bio||u.statusMsg||'';const fSnap=await get(ref(db,`friends/${me.uid}/${uid}`));const isFriend=fSnap.exists();document.getElementById('ppFriendBtn').innerHTML=`<i class="fas fa-user-${isFriend?'minus':'plus'}"></i> ${isFriend?'Unfriend':'Add Friend'}`;}});
+  const x=Math.min(e.clientX+10,window.innerWidth-230);const y=Math.min(e.clientY-20,window.innerHeight-300);
+  pop.style.left=x+'px';pop.style.top=y+'px';pop.classList.add('show');
+};
+window.fetchPpop=async(e,uid)=>{const s=await get(ref(db,`users/${uid}`));if(s.exists()){const u=s.val();showPpop(e,uid,u.username,u.avatar);}};
+window.closePpop=()=>{document.getElementById('ppop').classList.remove('show');ppopUid=null;};
+window.inviteFromPopup=()=>{if(ppopUid)sendInvite(ppopUid,ppopUN);closePpop();};
+document.addEventListener('click',e=>{if(!e.target.closest('.ppop')&&!e.target.closest('.mava')&&!e.target.closest('.urow'))closePpop();});
+
+// ── invite ──
+window.sendInvite=async(toUid,toUN)=>{
+  if(!activeRoom||activeRoom==='global'){toast('Select a private room first','err');return;}
+  const snap=await get(ref(db,`rooms/${activeRoom}`));if(!snap.exists())return;const r=snap.val();const link=`${location.origin}${location.pathname}?room=${activeRoom}`;
+  await push(ref(db,`notifications/${toUid}`),{type:'room_invite',from:me.uid,fromName:myP.username,fromAva:myP.avatar||'',roomId:activeRoom,roomName:r.name,link,joinCode:r.joinCode||'',ts:Date.now(),read:false});
+  toast(`Invite sent to ${toUN}!`,'ok');
+};
+
+// ══════════════════════════════════════════════
+// NOTIFICATIONS — FULLY FIXED (clear all + per-item dismiss)
+// ══════════════════════════════════════════════
+function subscribeNotifs(){
+  const u=onValue(ref(db,`notifications/${me.uid}`),snap=>{
+    if(!snap.exists()){updateNotifBadge(0);renderNotifs([]);return;}
+    const notifs=Object.entries(snap.val()).map(([id,n])=>({id,...n})).sort((a,b)=>b.ts-a.ts);
+    const unread=notifs.filter(n=>!n.read).length;
+    updateNotifBadge(unread);renderNotifs(notifs);
+  });
+  unsubs.push(u);
+}
+function updateNotifBadge(n){
+  ['notifHdrDot','nbd-notif','bn-notif-dot'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display=n>0?'flex':'none';el.textContent=n>0?n:'';}});
+}
+function renderNotifs(notifs){
+  const list=document.getElementById('npList');if(!list)return;
+  if(!notifs.length){list.innerHTML='<div class="np-empty"><i class="fas fa-bell-slash"></i><span>No notifications yet</span></div>';return;}
+  list.innerHTML=notifs.slice(0,40).map(n=>{
+    const ago=timeAgo(n.ts);
+    const dismissBtn=`<button class="ni-dismiss" title="Dismiss" onclick="event.stopPropagation();dismissN('${n.id}')"><i class="fas fa-times"></i></button>`;
+    if(n.type==='room_invite')return`<div class="ni${n.read?'':' unread'}" id="ni-${n.id}">
+      <div class="ni-ava"><img src="${n.fromAva||''}" alt=""/></div>
+      <div class="ni-cnt"><div class="ni-txt"><strong>${esc(n.fromName)}</strong> invited you to <strong>${esc(n.roomName)}</strong></div>
+      <div class="ni-time">${ago}</div>
+      <div class="ni-acts"><button class="btn btn-xs btn-primary" onclick="acceptInvite('${n.id}','${n.roomId}','${esc(n.roomName||'')}')"><i class="fas fa-check"></i> Join</button><button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();dismissN('${n.id}')"><i class="fas fa-times"></i> Dismiss</button></div></div>
+      ${dismissBtn}
+    </div>`;
+    if(n.type==='friend_add')return`<div class="ni${n.read?'':' unread'}" id="ni-${n.id}">
+      <div class="ni-ava"><img src="${n.fromAva||''}" alt=""/></div>
+      <div class="ni-cnt"><div class="ni-txt"><strong>${esc(n.fromName)}</strong> added you as a friend!</div>
+      <div class="ni-time">${ago}</div>
+      <div class="ni-acts"><button class="btn btn-xs btn-primary" onclick="openProfilePage('${n.from}');dismissN('${n.id}')"><i class="fas fa-user"></i> View</button><button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();dismissN('${n.id}')"><i class="fas fa-times"></i> Dismiss</button></div></div>
+      ${dismissBtn}
+    </div>`;
+    return`<div class="ni${n.read?'':' unread'}" id="ni-${n.id}">
+      <div class="ni-ico">🔔</div>
+      <div class="ni-cnt"><div class="ni-txt">${esc(n.text||'Notification')}</div><div class="ni-time">${ago}</div></div>
+      ${dismissBtn}
+    </div>`;
+  }).join('');
+}
+window.acceptInvite=async(nid,roomId,roomName)=>{await dismissN(nid);goRoom(roomId,'personal');toast(`Joined ${roomName}!`,'ok');};
+
+// dismissN — actually REMOVES the notification from Firebase (real per-item dismiss)
+window.dismissN=async id=>{
+  const el=document.getElementById('ni-'+id);
+  if(el){el.style.opacity='0';el.style.transform='translateX(40px)';el.style.transition='all .22s ease';setTimeout(()=>el.remove(),230);}
+  await remove(ref(db,`notifications/${me.uid}/${id}`));
+};
+
+window.markAllRead=async()=>{
+  const s=await get(ref(db,`notifications/${me.uid}`));if(!s.exists())return;
+  const ups={};Object.keys(s.val()).forEach(k=>{ups[k+'/read']=true;});
+  await update(ref(db,`notifications/${me.uid}`),ups);
+};
+
+// clearAllNotifs — removes ALL notifications from Firebase
+window.clearAllNotifs=async()=>{
+  if(!confirm('Clear all notifications?'))return;
+  try{
+    await remove(ref(db,`notifications/${me.uid}`));
+    document.getElementById('npList').innerHTML='<div class="np-empty"><i class="fas fa-bell-slash"></i><span>No notifications yet</span></div>';
+    updateNotifBadge(0);
+    toast('All notifications cleared','ok');
+  }catch(e){toast('Failed to clear notifications','err');}
+};
+
+function timeAgo(ts){const d=(Date.now()-ts)/1000;if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';if(d<86400)return Math.floor(d/3600)+'h ago';return Math.floor(d/86400)+'d ago';}
+
+// ══════════════════════════════════════════════
+// RANDOM MATCH — CHAT + VIDEO
+// ══════════════════════════════════════════════
+
+// Called from both mode cards
+window.startMatch=async(mode='chat')=>{
+  matchMode=mode;
+  document.getElementById('rIdle').style.display='none';
+  document.getElementById('rSearching').style.display='flex';
+  // Update orb color for video mode
+  const orb=document.getElementById('rSearchOrb');
+  orb.style.background=mode==='video'?'linear-gradient(135deg,var(--accent2),#FF8C00)':'linear-gradient(135deg,var(--accent),var(--accent2))';
+  document.getElementById('rSearchLbl').textContent=mode==='video'?'Searching for a video stranger...':'Searching for a stranger...';
+  mCnt=0;mTmr=setInterval(()=>{mCnt++;const m=Math.floor(mCnt/60),s=mCnt%60;document.getElementById('mTimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;},1000);
+
+  const queue=mode==='video'?'videoQueue':'matchQueue';
+  await set(ref(db,`${queue}/${me.uid}`),{uid:me.uid,username:myP.username,ts:Date.now(),mode});
+  onDisconnect(ref(db,`${queue}/${me.uid}`)).remove();
+
+  const qu=onValue(ref(db,queue),async snap=>{
+    if(!snap.exists())return;
+    const others=Object.entries(snap.val()).filter(([uid])=>uid!==me.uid);
+    if(!others.length)return;
+    others.sort((a,b)=>a[1].ts-b[1].ts);
+    const[sUid]=others[0];
+    if(me.uid<sUid){
+      const rRef=push(ref(db,'rooms'));const rid=rRef.key;
+      await set(rRef,{name:mode==='video'?'Video Chat':'Random Chat',type:'random',mode,owner:me.uid,ownerName:myP.username,members:{[me.uid]:true,[sUid]:true},createdAt:Date.now(),active:true});
+      await set(ref(db,`randomMatch/${me.uid}`),{roomId:rid,mode});
+      await set(ref(db,`randomMatch/${sUid}`),{roomId:rid,mode});
+    }
+  });
+  unsubs.push(qu);
+
+  const mu=onValue(ref(db,`randomMatch/${me.uid}`),async snap=>{
+    if(!snap.exists())return;
+    const{roomId,mode:m}=snap.val();
+    clearInterval(mTmr);qu();mu();
+    await remove(ref(db,`${queue}/${me.uid}`));await remove(ref(db,`randomMatch/${me.uid}`));
+    randRoom=roomId;
+    document.getElementById('rSearching').style.display='none';
+    if(m==='video')enterVideoRoom(roomId);
+    else enterRandRoom(roomId);
+  });
+  unsubs.push(mu);
+};
+
+// ── TEXT random match (existing flow) ──
+async function enterRandRoom(rid){
+  showView('vChat');
+  const old=document.getElementById('randCtrl');if(old)old.remove();
+  const ctrl=document.createElement('div');ctrl.id='randCtrl';ctrl.className='rand-ctrl';
+  ctrl.innerHTML=`<button class="btn btn-secondary btn-sm" onclick="nextStranger()"><i class="fas fa-forward"></i> Next Stranger</button><button class="btn btn-danger btn-sm" onclick="reportStranger()"><i class="fas fa-flag"></i> Report</button><div class="rand-lbl"><i class="fas fa-circle" style="font-size:.48rem;"></i>&nbsp;Stranger connected</div>`;
+  const vChat=document.getElementById('vChat');vChat.insertBefore(ctrl,document.getElementById('typingBar'));
+  activeRoom=rid;activeType='random';
+  setHdr('Random Chat','<i class="fas fa-random"></i> 1-on-1 with a stranger');
+  await push(ref(db,`messages/${rid}`),{uid:'system',text:'🎲 Stranger connected! Say hello 👋',timestamp:Date.now(),edited:false,deleted:false});
+  subMessages(rid);subTyping(rid);subPresence();
+}
+
+window.cancelMatch=async()=>{
+  clearInterval(mTmr);
+  const queue=matchMode==='video'?'videoQueue':'matchQueue';
+  await remove(ref(db,`${queue}/${me.uid}`));await remove(ref(db,`randomMatch/${me.uid}`));
+  cleanListeners();resetRandomUI();
+};
+window.nextStranger=async()=>{
+  if(randRoom){await update(ref(db,`rooms/${randRoom}`),{active:false});await remove(ref(db,`rooms/${randRoom}`));}
+  document.getElementById('randCtrl')?.remove();cleanListeners();randRoom=null;
+  showView('vRandom');resetRandomUI();startMatch('chat');
+};
+window.reportStranger=()=>{const r=prompt('Reason for reporting?');if(r)toast('Stranger reported. Thank you.','ok');};
+
+// ══════════════════════════════════════════════
+// WEBRTC VIDEO MATCH — P2P via Firebase signaling
+// ══════════════════════════════════════════════
+async function enterVideoRoom(rid){
+  vidRoomId=rid;
+  // Show vRandom, hide idle+searching, show video panel
+  showView('vRandom');
+  document.getElementById('rIdle').style.display='none';
+  document.getElementById('rSearching').style.display='none';
+  document.getElementById('rVideo').style.display='flex';
+  setHdr('Video Match','<i class="fas fa-video"></i> Face to face');
+  document.getElementById('vidMsgs').innerHTML='';
+  document.getElementById('vidStatus').innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:.3rem;display:inline-block;"></span>Connecting...';
+
+  // Get local camera
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480},audio:true});
+    document.getElementById('localVideo').srcObject=localStream;
+  }catch(err){
+    toast('Camera/mic access denied. Using audio only.','warn');
+    try{localStream=await navigator.mediaDevices.getUserMedia({audio:true});}catch{localStream=null;}
+  }
+
+  // Create RTCPeerConnection
+  pc=new RTCPeerConnection(RTC_CONFIG);
+  if(localStream)localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
+
+  // Remote stream → video element
+  const remoteStream=new MediaStream();
+  document.getElementById('remoteVideo').srcObject=remoteStream;
+  pc.ontrack=e=>{
+    e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t));
+    document.getElementById('vidRemoteOverlay').style.display='none';
+    document.getElementById('vidStatus').innerHTML='<span class="sdot son" style="margin-right:.3rem;"></span>Connected';
+  };
+
+  // ICE candidates → Firebase
+  pc.onicecandidate=async e=>{
+    if(e.candidate){
+      await push(ref(db,`signaling/${rid}/candidates/${me.uid}`),e.candidate.toJSON());
+    }
+  };
+
+  // Connection state — auto handle disconnect
+  pc.onconnectionstatechange=()=>{
+    const state=pc?.connectionState;
+    if(state==='disconnected'||state==='failed'||state==='closed'){
+      document.getElementById('vidStatus').innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:var(--err);margin-right:.3rem;display:inline-block;"></span>Disconnected';
+      toast('Stranger left. Finding a new one...','info');
+      // Auto cleanup and find next after 1.5s
+      setTimeout(async()=>{
+        await cleanupVideoCall();
+        resetRandomUI();
+        showView('vRandom');
+        setTimeout(()=>startMatch('video'),400);
+      },1500);
+    }
+  };
+
+  // Also watch Firebase room active flag — if stranger deletes/leaves room
+  const roomWatcher=onValue(ref(db,`rooms/${rid}/active`),snap=>{
+    if(snap.exists()&&snap.val()===false){
+      if(!pc||pc.connectionState==='closed')return;
+      toast('Stranger disconnected. Finding a new one...','info');
+      setTimeout(async()=>{
+        await cleanupVideoCall();
+        resetRandomUI();
+        showView('vRandom');
+        setTimeout(()=>startMatch('video'),400);
+      },1200);
+    }
+  });
+  vidUnsubs.push(roomWatcher);
+
+  // Determine role: the user with the lower uid creates the offer
+  const s=await get(ref(db,`rooms/${rid}`));
+  const room=s.val();
+  const isOfferer=room.owner===me.uid;
+
+  if(isOfferer){
+    // Create & send offer
+    const offer=await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await set(ref(db,`signaling/${rid}/offer`),{type:offer.type,sdp:offer.sdp,from:me.uid});
+    // Watch for answer
+    const u=onValue(ref(db,`signaling/${rid}/answer`),async snap=>{
+      if(!snap.exists())return;
+      if(pc.signalingState==='have-local-offer'){
+        await pc.setRemoteDescription(new RTCSessionDescription(snap.val()));
+      }
+    });
+    vidUnsubs.push(u);
+  }else{
+    // Watch for offer then send answer
+    const u=onValue(ref(db,`signaling/${rid}/offer`),async snap=>{
+      if(!snap.exists())return;
+      if(pc.signalingState!=='stable')return;
+      await pc.setRemoteDescription(new RTCSessionDescription(snap.val()));
+      const answer=await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      await set(ref(db,`signaling/${rid}/answer`),{type:answer.type,sdp:answer.sdp,from:me.uid});
+    });
+    vidUnsubs.push(u);
+  }
+
+  // Listen for remote ICE candidates
+  const otherUid=room.owner===me.uid?Object.keys(room.members).find(u=>u!==me.uid):room.owner;
+  if(otherUid){
+    const cu=onValue(ref(db,`signaling/${rid}/candidates/${otherUid}`),snap=>{
+      if(!snap.exists())return;
+      Object.values(snap.val()).forEach(async c=>{
+        try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch{}
+      });
+    });
+    vidUnsubs.push(cu);
+  }
+
+  // Subscribe to in-call text chat via Firebase messages
+  const mu=onValue(ref(db,`messages/${rid}`),snap=>{
+    if(!snap.exists())return;
+    const msgs=Object.values(snap.val()).sort((a,b)=>a.timestamp-b.timestamp);
+    const vidMsgs=document.getElementById('vidMsgs');vidMsgs.innerHTML='';
+    msgs.forEach(m=>{
+      if(m.uid==='system')return;
+      const div=document.createElement('div');div.className='vid-msg'+(m.uid===me.uid?' own':'');
+      div.innerHTML=`<span class="vid-msg-name">${m.uid===me.uid?'You':'Stranger'}</span><span class="vid-msg-text">${esc(m.text)}</span>`;
+      vidMsgs.appendChild(div);
+    });
+    vidMsgs.scrollTop=vidMsgs.scrollHeight;
+  });
+  vidUnsubs.push(mu);
+
+  // ★ FIX: Start watching remote emoji reactions
+  watchRemoteReacts(rid);
+
+  // Push system message
+  await push(ref(db,`messages/${rid}`),{uid:'system',text:'🎥 Video connected! You can also chat below.',timestamp:Date.now()});
+}
+
+// ── Video controls ──
+window.toggleMute=()=>{
+  if(!localStream)return;
+  const track=localStream.getAudioTracks()[0];if(!track)return;
+  isMuted=!isMuted;track.enabled=!isMuted;
+  document.getElementById('btnMute').innerHTML=`<i class="fas fa-microphone${isMuted?'-slash':''}"></i>`;
+  document.getElementById('btnMute').classList.toggle('off',isMuted);
+};
+window.toggleCam=()=>{
+  if(!localStream)return;
+  const track=localStream.getVideoTracks()[0];if(!track)return;
+  isCamOff=!isCamOff;track.enabled=!isCamOff;
+  document.getElementById('btnCam').innerHTML=`<i class="fas fa-video${isCamOff?'-slash':''}"></i>`;
+  document.getElementById('btnCam').classList.toggle('off',isCamOff);
+};
+window.toggleBlur=()=>{
+  isBlurred=!isBlurred;
+  const lv=document.getElementById('localVideo');
+  lv.style.filter=isBlurred?'blur(8px)':'none';
+  document.getElementById('btnBlur').classList.toggle('on',isBlurred);
+};
+window.endVideoCall=async()=>{
+  await cleanupVideoCall();
+  showView('vRandom');resetRandomUI();
+};
+window.nextVideoStranger=async()=>{
+  await cleanupVideoCall();
+  resetRandomUI();
+  showView('vRandom');
+  setTimeout(()=>startMatch('video'),300);
+};
+
+async function cleanupVideoCall(){
+  // Close peer connection
+  if(pc){pc.close();pc=null;}
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
+  // Clean Firebase signaling
+  if(vidRoomId){
+    await remove(ref(db,`signaling/${vidRoomId}`));
+    await update(ref(db,`rooms/${vidRoomId}`),{active:false});
+    await remove(ref(db,`rooms/${vidRoomId}`));
+    vidRoomId=null;
+  }
+  // Unsubscribe video listeners
+  vidUnsubs.forEach(fn=>{try{fn();}catch{}});vidUnsubs=[];
+  // Reset UI
+  document.getElementById('remoteVideo').srcObject=null;
+  document.getElementById('localVideo').srcObject=null;
+  document.getElementById('vidRemoteOverlay').style.display='flex';
+  isMuted=false;isCamOff=false;isBlurred=false;
+  randRoom=null;
+}
+
+// ── Video in-call text chat ──
+window.sendVidMsg=async()=>{
+  const inp=document.getElementById('vidInp');const text=inp.value.trim();if(!text||!vidRoomId)return;
+  inp.value='';
+  await push(ref(db,`messages/${vidRoomId}`),{uid:me.uid,username:myP.username,text,timestamp:Date.now()});
+};
+window.vidKey=e=>{if(e.key==='Enter')sendVidMsg();};
+
+// ── Video reactions burst ──
+window.sendReact=emoji=>{
+  // Show locally
+  burstReact(emoji);
+  // Broadcast via Firebase
+  if(vidRoomId)push(ref(db,`signaling/${vidRoomId}/reactions`),{emoji,from:me.uid,ts:Date.now()});
+};
+function burstReact(emoji){
+  const burst=document.getElementById('reactBurst');
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');el.className='react-float';el.textContent=emoji;
+    el.style.left=(20+Math.random()*60)+'%';el.style.animationDuration=(0.8+Math.random()*0.7)+'s';el.style.fontSize=(1.5+Math.random())+'rem';
+    burst.appendChild(el);setTimeout(()=>el.remove(),1800);
+  }
+}
+// Listen for remote reactions
+function watchRemoteReacts(rid){
+  const u=onValue(ref(db,`signaling/${rid}/reactions`),snap=>{
+    if(!snap.exists())return;
+    const items=Object.values(snap.val()).filter(r=>r.from!==me.uid&&Date.now()-r.ts<3000);
+    if(items.length){const last=items[items.length-1];burstReact(last.emoji);}
+  });
+  vidUnsubs.push(u);
+}
+
+// ── settings ──
+window.changeAva=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>1.3*1024*1024){toast('Max 1.3MB','err');return;}
+  const r=new FileReader();
+  r.onload=async ev=>{
+    const b64=ev.target.result;
+    document.getElementById('sAvaImg').src=b64;
+    document.getElementById('hAvaImg').src=b64;
+    await update(ref(db,`users/${me.uid}`),{avatar:b64,avatarCustom:true});
+    myP.avatar=b64;
+    toast('Avatar updated!','ok');
+  };
+  r.readAsDataURL(f);
+};
+window.saveProfile=async()=>{const bio=document.getElementById('sBio').value.trim(),sm=document.getElementById('sStatus').value.trim();await update(ref(db,`users/${me.uid}`),{bio,statusMsg:sm});myP.bio=bio;myP.statusMsg=sm;toast('Profile saved!','ok');};
+window.togglePref=async(el,key)=>{el.classList.toggle('on');await update(ref(db,`users/${me.uid}`),{[key]:el.classList.contains('on')});};
+window.toggleLocal=(el,key)=>{el.classList.toggle('on');prefs[key]=el.classList.contains('on');localStorage.setItem('nc_prefs',JSON.stringify(prefs));};
+window.reqDesktop=async el=>{el.classList.toggle('on');if(el.classList.contains('on')){const p=await Notification.requestPermission();if(p!=='granted'){el.classList.remove('on');toast('Notifications blocked','err');}}};
+function applyPrefs(){if(prefs.sound===false)document.getElementById('tSnd')?.classList.remove('on');}
+let unTO=null;
+window.checkUN=()=>{clearTimeout(unTO);const v=document.getElementById('sNewUN').value.trim(),el=document.getElementById('sUNNote');if(!v){el.textContent='';el.className='fnote';return;}unTO=setTimeout(async()=>{const s=await get(ref(db,`usernames/${v.toLowerCase()}`));if(s.exists()){el.innerHTML='<i class="fas fa-times-circle"></i> Taken';el.className='fnote err';}else{el.innerHTML='<i class="fas fa-check-circle"></i> Available';el.className='fnote ok';}},440);};
+window.updateUN=async()=>{const un=document.getElementById('sNewUN').value.trim();if(!un)return;if(!/^[a-zA-Z0-9_]{4,20}$/.test(un)){toast('Invalid username','err');return;}const days=(Date.now()-(myP.unLastChanged||0))/(1000*60*60*24);if(days<30){toast(`Can change in ${Math.ceil(30-days)} days`,'err');return;}const s=await get(ref(db,`usernames/${un.toLowerCase()}`));if(s.exists()){toast('Username taken!','err');return;}await remove(ref(db,`usernames/${myP.username.toLowerCase()}`));await set(ref(db,`usernames/${un.toLowerCase()}`),me.uid);await update(ref(db,`users/${me.uid}`),{username:un,unLastChanged:Date.now()});myP.username=un;document.getElementById('sUN').textContent=un;document.getElementById('sNewUN').value='';toast('Username updated!','ok');};
+
+// ── CHIME ──
+function playChime(){
+  if(!prefs.sound)return;
+  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const play=(freq,start,dur,vol=.07)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(0,ac.currentTime+start);g.gain.linearRampToValueAtTime(vol,ac.currentTime+start+0.02);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+start+dur);o.start(ac.currentTime+start);o.stop(ac.currentTime+start+dur);};play(880,0,.18);play(1100,.15,.18);}catch{}
+}
+
+// ── filter ──
+window.filterRooms=q=>{document.querySelectorAll('.ri').forEach(el=>{const n=el.querySelector('.rname')?.textContent?.toLowerCase()||'';el.style.display=n.includes(q.toLowerCase())?'':'none';});};
+
+// ── logout ──
+window.doLogout=async()=>{
+  if(!confirm('Sign out?'))return;
+  await cleanupVideoCall().catch(()=>{});
+  cleanListeners();clearTy();
+  await remove(ref(db,`presence/${me.uid}`));
+  await remove(ref(db,`matchQueue/${me.uid}`));
+  await remove(ref(db,`videoQueue/${me.uid}`));
+  await signOut(auth);location.href='login.html';
+};
+
+// ── cleanup ──
+function cleanListeners(){
+  unsubs.forEach(fn=>{try{fn();}catch{}});unsubs=[];
+  clearTimeout(typTO);clearInterval(mTmr);
+  document.getElementById('randCtrl')?.remove();
+}
+
+// ── modals ──
+window.openM=id=>document.getElementById(id)?.classList.add('open');
+window.closeM=id=>document.getElementById(id)?.classList.remove('open');
+document.querySelectorAll('.modal-ov').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+// ── sidebar (mobile) ──
+window.openSb=()=>{document.getElementById('chSb').classList.add('open');document.getElementById('chBd').classList.add('show');};
+window.closeSb=()=>{document.getElementById('chSb').classList.remove('open');document.getElementById('chBd').classList.remove('show');};
+
+// ── header helper ──
+function setHdr(name,meta){document.getElementById('hRN').innerHTML=`<i class="fas fa-hashtag" style="color:var(--textD);font-size:.72rem;"></i>&nbsp;${name}`;document.getElementById('hRM').innerHTML=meta||'';document.title=name+' — NexusChat';}
+
+// ── toast ──
+window.toast=(msg,type='info')=>{
+  const icons={ok:'fa-check-circle',err:'fa-exclamation-circle',info:'fa-info-circle',warn:'fa-exclamation-triangle'};
+  const box=document.getElementById('toast-box');const t=document.createElement('div');
+  t.className=`toast ${type}`;t.innerHTML=`<i class="fas ${icons[type]||'fa-info-circle'}"></i>${msg}`;
+  box.appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),260);},3000);
+};
+
+// ── esc ──
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── responsive — let CSS handle display, JS only closes open drawers ──
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>820){
+    document.getElementById('chSb').classList.remove('open');
+    document.getElementById('chBd').classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>
