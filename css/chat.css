@@ -5,7 +5,7 @@
    BUG FIX: grid-column on .chat-main MUST be updated
    at every breakpoint where the column count changes.
 ═══════════════════════════════════════════════ */
-/* .app {
+.app {
   display: grid;
   grid-template-columns: var(--navW) var(--chW) 1fr var(--rightW);
   grid-template-rows: var(--hdrH) 1fr;
@@ -14,18 +14,8 @@
   overflow: hidden;
   position: relative;
   z-index: 1;
-} */
-
-.app {
-  display: grid;
-  grid-template-columns: var(--navW) var(--chW) 1fr var(--rightW);
-  grid-template-rows: var(--hdrH) 1fr;
-  height: 100dvh;          /* ONLY THIS LINE */
-  max-height: 100dvh;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
 }
+
 
 
 /* Chat Info Button - Top Right */
@@ -861,19 +851,14 @@
 @media (max-width: 560px) {
   /* Remove nav rail column from grid */
   :root { --navW: 0px; }
-  /* .app {
+  .app {
     grid-template-columns: 1fr;
  
     height: calc(100vh - var(--botNavH));
     height: calc(100svh - var(--botNavH)); 
-  } */
-
-    .app {
-    grid-template-columns: 1fr;
-    height: 100dvh;              /* ONLY THIS */
-    padding-bottom: var(--botNavH); /* Push content up */
-    box-sizing: border-box;
   }
+
+
 
   /* ★★★ CRITICAL BUG FIX: chat-main spans only 1 column ★★★ */
   .chat-main { grid-column: 1; }
